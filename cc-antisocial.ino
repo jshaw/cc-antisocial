@@ -29,10 +29,10 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, PIN, NEO_GRB + NEO_KHZ800);
 // Init an Ultrasonic object
 // ===========================
 // TODO: Put these inits and declarations into an array
-Ultrasonic ultrasonicOne(3, 2);
-Ultrasonic ultrasonicTwo(5, 4);
-Ultrasonic ultrasonicThree(7, 6);
-Ultrasonic ultrasonicFour(9, 8);
+Ultrasonic ultrasonicOne(9, 8);
+Ultrasonic ultrasonicTwo(7, 6);
+Ultrasonic ultrasonicThree(5, 4);
+Ultrasonic ultrasonicFour(3, 2);
 //Ultrasonic ultrasonicFive(10, 9);
 
 int distanceOne = 0;
@@ -55,6 +55,10 @@ const byte size = 4;
 int rawArray[size] = {1,2,3};
 int sensorArrayValue[size];
 Array<int> array = Array<int>(sensorArrayValue, size);
+
+const long averageDifference = 10;
+unsigned long previousAverage = 0;
+unsigned long currentAverage = 0;
 
 // Timer init
 // ===========================
@@ -103,9 +107,9 @@ void setup() {
 void loop() {
 
   // Some example procedures showing how to display to the pixels:
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
-  colorWipe(strip.Color(0, 255, 0), 50); // Green
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue
+//  colorWipe(strip.Color(255, 0, 0), 50); // Red
+//  colorWipe(strip.Color(0, 255, 0), 50); // Green
+//  colorWipe(strip.Color(0, 0, 255), 50); // Blue
 
   unsigned long currentMillis = millis();
 
@@ -145,6 +149,21 @@ void loop() {
     Serial.println(array.getMinIndex());
     Serial.print("AVERAGE: ");
     Serial.println(array.getAverage());
+
+    currentAverage = array.getAverage();
+
+    if(abs(currentAverage - previousAverage) >= averageDifference) {
+      previousAverage = currentAverage;
+      Serial.println("PREVIOUS");
+      Serial.println(abs(currentAverage - previousAverage));
+    } else {
+      Serial.println("========PREVIOUS=======");
+      Serial.println(abs(currentAverage - previousAverage));
+      return;
+    }
+
+    mapSonarPosition(array.getMinIndex(), 50);
+
 
     // SUDO CODE
     // Some gravity maths :
@@ -228,6 +247,33 @@ void colorWipe(uint32_t c, uint8_t wait) {
     strip.show();
     delay(wait);
   }
+}
+
+void mapSonarPosition(int quator, uint8_t wait) {
+  Serial.print("============");
+  Serial.print(quator);
+  Serial.println("------------");
+  
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    if(i >= (quator * 7) && i <= (quator * 7 + 7)){
+      strip.setPixelColor(i, strip.Color(127, 127, 127));
+      strip.show();
+//      delay(wait);
+    } else {
+      strip.setPixelColor(i, strip.Color(0, 0, 0));
+      strip.show();
+    }
+
+  }
+    
+//    strip.setPixelColor(, strip.Color(127, 127, 127));
+//    strip.show();
+//    delay(wait);
+//  for(uint16_t i=0; i<strip.numPixels(); i++) {
+//    strip.setPixelColor(i, c);
+//    strip.show();
+//    delay(wait);
+//  }
 }
 
 void rainbow(uint8_t wait) {
