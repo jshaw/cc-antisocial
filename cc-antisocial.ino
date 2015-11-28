@@ -25,6 +25,10 @@
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, PIN, NEO_GRB + NEO_KHZ800);
 
+// Position & direction of bar
+int pos = 0, 
+int dir = 1; 
+
 
 // Init an Ultrasonic object
 // ===========================
@@ -122,10 +126,39 @@ void loop() {
   distanceFour = ultrasonicFour.Ranging(CM);
 //  distanceFive = ultrasonicFive.Ranging(CM);
 
+  int j;
+ 
+  // Draw 5 pixels centered on pos.  setPixelColor() will clip any
+  // pixels off the ends of the strip, we don't need to watch for that.
+  strip.setPixelColor(pos - 2, 0x100000); // Dark red
+  strip.setPixelColor(pos - 1, 0x800000); // Medium red
+  strip.setPixelColor(pos    , 0xFF3000); // Center pixel is brightest
+  strip.setPixelColor(pos + 1, 0x800000); // Medium red
+  strip.setPixelColor(pos + 2, 0x100000); // Dark red
+ 
+  strip.show();
+  delay(30);
+ 
+  // Rather than being sneaky and erasing just the tail pixel,
+  // it's easier to erase it all and draw a new one next time.
+  for(j=-2; j<= 2; j++) { 
+    strip.setPixelColor(pos+j, 0);
+  }
+ 
+  // Bounce off ends of strip
+  pos += dir;
+  if(pos < 0) {
+    pos = 1;
+    dir = -dir;
+  } else if(pos >= strip.numPixels()) {
+    pos = strip.numPixels() - 2;
+    dir = -dir;
+  }
+
   if(currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;  
     
-    Serial.print("d1: ");
+    Serial. print("d1: ");
     Serial.print(checkDistance(distanceOne));
     Serial.print(", ");
     Serial.print("d2: ");
@@ -150,19 +183,22 @@ void loop() {
     Serial.print("AVERAGE: ");
     Serial.println(array.getAverage());
 
+// PIXEL FOLLOW SONAR
     currentAverage = array.getAverage();
 
-    if(abs(currentAverage - previousAverage) >= averageDifference) {
-      previousAverage = currentAverage;
-      Serial.println("PREVIOUS");
-      Serial.println(abs(currentAverage - previousAverage));
-    } else {
-      Serial.println("========PREVIOUS=======");
-      Serial.println(abs(currentAverage - previousAverage));
-      return;
-    }
+//    if(abs(currentAverage - previousAverage) >= averageDifference) {
+//      previousAverage = currentAverage;
+//      Serial.println("PREVIOUS");
+//      Serial.println(abs(currentAverage - previousAverage));
+//    } else {
+//      Serial.println("========PREVIOUS=======");
+//      Serial.println(abs(currentAverage - previousAverage));
+//      return;
+//    }
+//
+//    mapSonarPosition(array.getMinIndex(), 50);
 
-    mapSonarPosition(array.getMinIndex(), 50);
+//    fade(10);
 
 
     // SUDO CODE
@@ -244,6 +280,54 @@ void establishContact() {
 void colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     strip.setPixelColor(i, c);
+    strip.show();
+    delay(wait);
+  }
+}
+
+void fade(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=1; j<200; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, strip.Color(127, 127, 127));
+      strip.setBrightness(j);
+      delay(wait);
+    }
+    strip.show();
+    delay(wait);
+  }
+
+  for(j=200; j>1; j--) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, strip.Color(127, 127, 127));
+      strip.setBrightness(j);
+      delay(wait);
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+void fadeStep(uint8_t wait) {
+  uint16_t i, j;
+
+  for(i=0; i<strip.numPixels(); i++) {
+    for(j=1; j<200; j++) {
+      strip.setPixelColor(i, strip.Color(j, j, j));
+      strip.show();
+      delay(wait);
+    }
+    strip.show();
+    delay(wait);
+  }
+
+  for(i=0; i<strip.numPixels(); i++) {
+    for(j=200; j>1; j--) {
+      strip.setPixelColor(i, strip.Color(j, j, j));
+      strip.show();
+      delay(wait);
+    }
     strip.show();
     delay(wait);
   }
