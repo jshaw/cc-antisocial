@@ -26,9 +26,10 @@
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, PIN, NEO_GRB + NEO_KHZ800);
 
 // Position & direction of bar
-int pos = 0, 
+int pos = 0;
 int dir = 1; 
-
+int previousMinIndex = 0;
+int lowBase = 0;
 
 // Init an Ultrasonic object
 // ===========================
@@ -127,33 +128,76 @@ void loop() {
 //  distanceFive = ultrasonicFive.Ranging(CM);
 
   int j;
- 
+  int minIndex = array.getMinIndex();
+   
   // Draw 5 pixels centered on pos.  setPixelColor() will clip any
   // pixels off the ends of the strip, we don't need to watch for that.
-  strip.setPixelColor(pos - 2, 0x100000); // Dark red
-  strip.setPixelColor(pos - 1, 0x800000); // Medium red
-  strip.setPixelColor(pos    , 0xFF3000); // Center pixel is brightest
-  strip.setPixelColor(pos + 1, 0x800000); // Medium red
-  strip.setPixelColor(pos + 2, 0x100000); // Dark red
+  strip.setPixelColor(pos - 3, 0x100000); // Dark red
+  strip.setPixelColor(pos - 2, 0x500000); // Dark red
+  strip.setPixelColor(pos - 1, 0x900000); // Medium red
+  strip.setPixelColor(pos    , 0xFF0000); // Center pixel is brightest
+  strip.setPixelColor(pos + 1, 0x900000); // Medium red
+  strip.setPixelColor(pos + 2, 0x500000); // Dark red
+  strip.setPixelColor(pos + 3, 0x100000); // Dark red
  
   strip.show();
-  delay(30);
+//  delay(30);
  
   // Rather than being sneaky and erasing just the tail pixel,
   // it's easier to erase it all and draw a new one next time.
-  for(j=-2; j<= 2; j++) { 
+  for(j=-3; j<= 3; j++) { 
     strip.setPixelColor(pos+j, 0);
   }
- 
-  // Bounce off ends of strip
-  pos += dir;
-  if(pos < 0) {
-    pos = 1;
-    dir = -dir;
-  } else if(pos >= strip.numPixels()) {
-    pos = strip.numPixels() - 2;
-    dir = -dir;
+
+  if(minIndex == 0){
+    lowBase = 3;
+  } else if (minIndex == 1){
+    lowBase = 10;
+  } else if(minIndex == 2) {
+    lowBase = 19;
+  } else if(minIndex == 3) {
+    lowBase = 26;
+  } else {
+    lowBase = 26;
   }
+
+  if(pos < lowBase){
+    pos++;
+  } else if(pos > lowBase){
+    pos--;  
+  }
+
+  //  DO STUFF HERE
+//  pos += dir;
+//  if (previousMinIndex > minIndex){
+//    if(pos < lowBase) {
+//      pos += dir;
+////      pos = -1;
+////      dir = -dir;
+//    }
+////    pos = 1;
+////    dir = -dir;
+//  } else if(previousMinIndex > minIndex){
+//    if(pos > lowBase) {
+//      pos -= dir;
+//    }
+////    pos = 1;
+////    dir = -dir;
+//  } else {
+//    // DO NOTHING
+//  }
+
+  // Bounce off ends of strip
+//  pos += dir;
+//  if(pos < 0) {
+//    pos = 1;
+//    dir = -dir;
+//  } else if(pos >= strip.numPixels()) {
+//    pos = strip.numPixels() - 2;
+//    dir = -dir;
+//  }
+
+  previousMinIndex = minIndex;
 
   if(currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;  
@@ -199,41 +243,6 @@ void loop() {
 //    mapSonarPosition(array.getMinIndex(), 50);
 
 //    fade(10);
-
-
-    // SUDO CODE
-    // Some gravity maths :
-    // https://codebender.cc/sketch:56734#BouncingBalls2014.ino
-    // https://github.com/fibonacci162/LEDs
-    // https://github.com/fibonacci162/LEDs/blob/master/BouncingBalls2014/BouncingBalls2014.ino
-    
-    // if average is > 325 {
-      // if index 0 is the lowest raise the left motor
-        // do something with the LED
-        // Physics
-      // if index 3 is the lowest raise the right motor
-        // do something with the LED
-        // Physics
-    // } else {
-      // map distance for 0 - 400 cm (13 feet)
-      // map the distance to the height it can travel
-      // the number of steps the motor needs to take 
-      // Total 8 feet
-      // 28 steps per rotation
-      // lets make it 2 rotations per foot
-      // = 56 steps per foot
-      // = 448 steps total movement from top to bottom
-      // map 400 cm to 448 so each cm someone gets closer to the peice it 
-      // directly interacts with their movement
-    // }
-
-    // Also need a set of programs on how it behaves when there isn't anyone there.
-    // need to make it so that it inches down
-
-    // if there isn't anyone near{
-      // slowly inch down one , 5, 10 steps at a time and update the leds
-    // }
-
     
 //    Serial.print(", ");
 //    Serial.print("d5: ");
@@ -283,6 +292,39 @@ void colorWipe(uint32_t c, uint8_t wait) {
     strip.show();
     delay(wait);
   }
+}
+
+void larson(){
+
+  int j;
+   
+  // Draw 5 pixels centered on pos.  setPixelColor() will clip any
+  // pixels off the ends of the strip, we don't need to watch for that.
+  strip.setPixelColor(pos - 2, 0x100000); // Dark red
+  strip.setPixelColor(pos - 1, 0x800000); // Medium red
+  strip.setPixelColor(pos    , 0xFF3000); // Center pixel is brightest
+  strip.setPixelColor(pos + 1, 0x800000); // Medium red
+  strip.setPixelColor(pos + 2, 0x100000); // Dark red
+ 
+  strip.show();
+  delay(30);
+ 
+  // Rather than being sneaky and erasing just the tail pixel,
+  // it's easier to erase it all and draw a new one next time.
+  for(j=-2; j<= 2; j++) { 
+    strip.setPixelColor(pos+j, 0);
+  }
+  
+  // Bounce off ends of strip
+  pos += dir;
+  if(pos < 0) {
+    pos = 1;
+    dir = -dir;
+  } else if(pos >= strip.numPixels()) {
+    pos = strip.numPixels() - 2;
+    dir = -dir;
+  }
+  
 }
 
 void fade(uint8_t wait) {
@@ -453,3 +495,40 @@ uint32_t Wheel(byte WheelPos) {
   WheelPos -= 170;
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
+
+
+
+
+// SUDO CODE
+// Some gravity maths :
+// https://codebender.cc/sketch:56734#BouncingBalls2014.ino
+// https://github.com/fibonacci162/LEDs
+// https://github.com/fibonacci162/LEDs/blob/master/BouncingBalls2014/BouncingBalls2014.ino
+
+// if average is > 325 {
+  // if index 0 is the lowest raise the left motor
+    // do something with the LED
+    // Physics
+  // if index 3 is the lowest raise the right motor
+    // do something with the LED
+    // Physics
+// } else {
+  // map distance for 0 - 400 cm (13 feet)
+  // map the distance to the height it can travel
+  // the number of steps the motor needs to take 
+  // Total 8 feet
+  // 28 steps per rotation
+  // lets make it 2 rotations per foot
+  // = 56 steps per foot
+  // = 448 steps total movement from top to bottom
+  // map 400 cm to 448 so each cm someone gets closer to the peice it 
+  // directly interacts with their movement
+// }
+
+// Also need a set of programs on how it behaves when there isn't anyone there.
+// need to make it so that it inches down
+
+// if there isn't anyone near{
+  // slowly inch down one , 5, 10 steps at a time and update the leds
+// }
+
