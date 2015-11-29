@@ -132,13 +132,7 @@ void loop() {
   int minIndex = array.getMinIndex();
   int minNum = array.getMin();
   int disAverage = array.getAverage();
-
-  Serial.println("==================");
-  Serial.println(disAverage);
-  Serial.println(maxAverage);
-  Serial.println("==================");
   
-
   if(disAverage > 120){
     // switch modes
     // loop through and dop fun things like no one is watching
@@ -156,7 +150,6 @@ void loop() {
     strip.setPixelColor(pos2 + 3, strip.Color(defaultColor[0], 0, 0)); // Dark red
     
     strip.show();
-//    delay(30);
     
     // Rather than being sneaky and erasing just the tail pixel,
     // it's easier to erase it all and draw a new one next time.
