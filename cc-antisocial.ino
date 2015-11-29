@@ -27,9 +27,13 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, PIN, NEO_GRB + NEO_KHZ800);
 
 // Position & direction of bar
 int pos = 0;
-int dir = 1; 
+int dir = 1;
+int pos2 = 0;
+int dir2 = 1;
+
 int previousMinIndex = 0;
 int lowBase = 0;
+int maxAverage= 120;
 
 int defaultColor[4] = {16, 90, 160, 255};
 int currentColor[4] = {16, 90, 160, 255};
@@ -64,7 +68,8 @@ int rawArray[size] = {1,2,3};
 int sensorArrayValue[size];
 Array<int> array = Array<int>(sensorArrayValue, size);
 
-const long averageDifference = 10;
+const long averageDifferenceLow = 5;
+const long averageDifferenceHigh = 20;
 unsigned long previousAverage = 0;
 unsigned long currentAverage = 0;
 
@@ -109,9 +114,6 @@ void setup() {
    Serial.print("\tAverage value:");
    Serial.print(array.getAverage());
    Serial.println();
-
-//   delay(1000);
-   
 }
 
 void loop() {
@@ -129,168 +131,231 @@ void loop() {
   int j;
   int minIndex = array.getMinIndex();
   int minNum = array.getMin();
+  int disAverage = array.getAverage();
 
-
-//  Serial.println();
-//  Serial.println(currentColor[3]);
-//  Serial.println();
+  Serial.println("==================");
+  Serial.println(disAverage);
+  Serial.println(maxAverage);
+  Serial.println("==================");
   
 
-  if (minNum == 0){
-    // roll up the motors
-    // fade the lights
-    Serial.println("Waiting for the sonars to start detecting");
-    Serial.println(minNum);
-  } else if (minNum > 0 && minNum < 20){
-    // roll up the motors
-    // fade the lights
-    if (currentColor[0] > 0){
-      currentColor[0] -= 2;
-    }
-
-    if (currentColor[1] > 0){
-      currentColor[1] -= 2;
-    }
-
-    if (currentColor[2] > 0){
-      currentColor[2] -= 2;
-    }
-
-    if (currentColor[3] > 0){
-      currentColor[3] -= 2;
+  if(disAverage > 120){
+    // switch modes
+    // loop through and dop fun things like no one is watching
+    // low yourself from the ceiling
+    int j;
+   
+    // Draw 5 pixels centered on pos.  setPixelColor() will clip any
+    // pixels off the ends of the strip, we don't need to watch for that.
+    strip.setPixelColor(pos2 - 3, strip.Color(defaultColor[0], 0, 0)); // Dark red
+    strip.setPixelColor(pos2 - 2, strip.Color(defaultColor[1], 0, 0)); // Dark red
+    strip.setPixelColor(pos2 - 1, strip.Color(defaultColor[2], 0, 0)); // Medium red
+    strip.setPixelColor(pos2    , strip.Color(defaultColor[3], 0 , 0)); // Center pixel is brightest
+    strip.setPixelColor(pos2 + 1, strip.Color(defaultColor[2], 0, 0)); // Medium red
+    strip.setPixelColor(pos2 + 2, strip.Color(defaultColor[1], 0, 0)); // Dark red
+    strip.setPixelColor(pos2 + 3, strip.Color(defaultColor[0], 0, 0)); // Dark red
+    
+    strip.show();
+//    delay(30);
+    
+    // Rather than being sneaky and erasing just the tail pixel,
+    // it's easier to erase it all and draw a new one next time.
+    for(j=-3; j<= 3; j++) { 
+      strip.setPixelColor(pos2+j, 0);
     }
     
-  } else if (minNum > 19) {
-    if (currentColor[0] < defaultColor[0]){
-      currentColor[0] += 1;
+    // Bounce off ends of strip
+    pos2 += dir2;
+    if(pos2 < 0) {
+      pos2 = 1;
+      dir2 = -dir2;
+    } else if(pos2 >= strip.numPixels()) {
+      pos2 = strip.numPixels() - 2;
+      dir2 = -dir2;
     }
 
-    if (currentColor[1] < defaultColor[1]){
-      currentColor[1] += 1;
-    }
-
-    if (currentColor[2] < defaultColor[2]){
-      currentColor[2] += 1;
-    }
-
-    if (currentColor[3] < defaultColor[3]){
-      currentColor[3] += 1;
-    }
-    
-  }  
-
-//  Original hex values 
-//  strip.setPixelColor(pos - 3, 0x100000); // Dark red
-//  strip.setPixelColor(pos - 2, 0x800000); // Dark red
-//  strip.setPixelColor(pos - 1, 0xF00000); // Medium red
-//  strip.setPixelColor(pos    , 0xFF0000); // Center pixel is brightest
-//  strip.setPixelColor(pos + 1, 0xF00000); // Medium red
-//  strip.setPixelColor(pos + 2, 0x800000); // Dark red
-//  strip.setPixelColor(pos + 3, 0x100000); // Dark red
-
-  strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Dark red
-  strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-  strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-  strip.setPixelColor(pos    , strip.Color(currentColor[3], 0 , 0)); // Center pixel is brightest
-  strip.setPixelColor(pos + 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-  strip.setPixelColor(pos + 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-  strip.setPixelColor(pos + 3, strip.Color(currentColor[0], 0, 0)); // Dark red
- 
-  strip.show();
-  //  delay(30);
- 
-  // Rather than being sneaky and erasing just the tail pixel,
-  // it's easier to erase it all and draw a new one next time.
-  for(j=-3; j<= 3; j++) { 
-    strip.setPixelColor(pos+j, 0);
-  }
-
-  if(minIndex == 0){
-    lowBase = 3;
-  } else if (minIndex == 1){
-    lowBase = 10;
-  } else if(minIndex == 2) {
-    lowBase = 19;
-  } else if(minIndex == 3) {
-    lowBase = 26;
-  } else {
-    lowBase = 26;
-  }
-
-  if(pos < lowBase){
-    pos++;
-  } else if(pos > lowBase){
-    pos--;  
-  }
-
-  previousMinIndex = minIndex;
-
-  if(currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;  
-    
-    Serial. print("d1: ");
-    Serial.print(checkDistance(distanceOne));
-    Serial.print(", ");
-    Serial.print("d2: ");
-    Serial.print(checkDistance(distanceTwo));
-    Serial.print(", ");
-    Serial.print("d3: ");
-    Serial.print(checkDistance(distanceThree));
-    Serial.print(", ");
-    Serial.print("d4: ");
-    Serial.println(checkDistance(distanceFour));
-    
+//  #TODO: put this into a function as well as the thing below
+// when the distance gets too large, should either fade out or reset by 
+// going to position one and than do default mode stuff    
     sensorArrayValue[0] = checkDistance(distanceOne);
     sensorArrayValue[1] = checkDistance(distanceTwo);
     sensorArrayValue[2] = checkDistance(distanceThree);
     sensorArrayValue[3] = checkDistance(distanceFour);
-
-    Array<int> array = Array<int>(sensorArrayValue, size);
-    Serial.print("MIN VALUE: ");
-    Serial.println(array.getMin());
-    Serial.print("MIN INDEX: ");
-    Serial.println(array.getMinIndex());
-    Serial.print("AVERAGE: ");
-    Serial.println(array.getAverage());
-
-// PIXEL FOLLOW SONAR
+    
+    return;
+  } else {
+  
+  
+  //  Serial.println();
+  //  Serial.println(currentColor[3]);
+  //  Serial.println();
+    
+    //  Waiting for the sonars to start to work
+    if (minNum == 0){
+      Serial.println("Waiting for the sonars to start detecting");
+    } else if (minNum > 0 && minNum < 20){
+      // roll up the motors
+      
+      // fade the lights
+      // TODO: put this in a function
+      if (currentColor[0] > 0){
+        currentColor[0] -= 10;
+        if(currentColor[0] < 0){
+          currentColor[0] = 0;
+        }
+      }
+  
+      if (currentColor[1] > 0){
+        currentColor[1] -= 10;
+        if(currentColor[1] < 0){
+          currentColor[1] = 0;
+        }
+      }
+  
+      if (currentColor[2] > 0){
+        currentColor[2] -= 10;
+        if(currentColor[2] < 0){
+          currentColor[2] = 0;
+        }
+      }
+  
+      if (currentColor[3] > 0){
+        currentColor[3] -= 10;
+        if(currentColor[3] < 0){
+          currentColor[3] = 0;
+        }
+      }
+      
+    } else if (minNum > 19) {
+      if (currentColor[0] < defaultColor[0]){
+        currentColor[0] += 5;
+      }
+  
+      if (currentColor[1] < defaultColor[1]){
+        currentColor[1] += 5;
+      }
+  
+      if (currentColor[2] < defaultColor[2]){
+        currentColor[2] += 1;
+      }
+  
+      if (currentColor[3] < defaultColor[3]){
+        currentColor[3] += 1;
+      }
+      
+    }  
+  
+    strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+    strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+    strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+    strip.setPixelColor(pos    , strip.Color(currentColor[3], 0 , 0)); // Center pixel is brightest
+    strip.setPixelColor(pos + 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+    strip.setPixelColor(pos + 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+    strip.setPixelColor(pos + 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+   
+    strip.show();
+    //  delay(30);
+   
+    // Rather than being sneaky and erasing just the tail pixel,
+    // it's easier to erase it all and draw a new one next time.
+    for(j=-3; j<= 3; j++) { 
+      strip.setPixelColor(pos+j, 0);
+    }
+  
     currentAverage = array.getAverage();
+    if((abs(currentAverage - previousAverage) >= averageDifferenceLow) || (abs(currentAverage - previousAverage) <= averageDifferenceHigh)) {
+      previousAverage = currentAverage;
+      
+      if(minIndex == 0){
+        lowBase = 3;
+      } else if (minIndex == 1){
+        lowBase = 10;
+      } else if(minIndex == 2) {
+        lowBase = 19;
+      } else if(minIndex == 3) {
+        lowBase = 26;
+      } else {
+        lowBase = 26;
+      }
+      
+    }
+  
+    if(pos < lowBase){
+      pos++;
+    } else if(pos > lowBase){
+      pos--;  
+    }
+  
+    previousMinIndex = minIndex;
+  
+    if(currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;  
+      
+      Serial. print("d1: ");
+      Serial.print(checkDistance(distanceOne));
+      Serial.print(", ");
+      Serial.print("d2: ");
+      Serial.print(checkDistance(distanceTwo));
+      Serial.print(", ");
+      Serial.print("d3: ");
+      Serial.print(checkDistance(distanceThree));
+      Serial.print(", ");
+      Serial.print("d4: ");
+      Serial.println(checkDistance(distanceFour));
+      
+      sensorArrayValue[0] = checkDistance(distanceOne);
+      sensorArrayValue[1] = checkDistance(distanceTwo);
+      sensorArrayValue[2] = checkDistance(distanceThree);
+      sensorArrayValue[3] = checkDistance(distanceFour);
+  
+      Array<int> array = Array<int>(sensorArrayValue, size);
+      Serial.print("MIN VALUE: ");
+      Serial.println(array.getMin());
+      Serial.print("MIN INDEX: ");
+      Serial.println(array.getMinIndex());
+      Serial.print("AVERAGE: ");
+      Serial.println(array.getAverage());
+  
+  // PIXEL FOLLOW SONAR
+      currentAverage = array.getAverage();
+  
+  //    if(abs(currentAverage - previousAverage) >= averageDifference) {
+  //      previousAverage = currentAverage;
+  //      Serial.println("PREVIOUS");
+  //      Serial.println(abs(currentAverage - previousAverage));
+  //    } else {
+  //      Serial.println("========PREVIOUS=======");
+  //      Serial.println(abs(currentAverage - previousAverage));
+  //      return;
+  //    }
+  //
+  //    mapSonarPosition(array.getMinIndex(), 50);
+  
+  //    fade(10);
+      
+  //    Serial.print(", ");
+  //    Serial.print("d5: ");
+  //    Serial.println(distanceFive);
+      
+      }
+  
+  //  Serial.println("Hello, world!");
+  //  
+  //  if (Serial.available()) { 
+  //    val = Serial.read(); // read it and store it in val
+  //  
+  //    if (val == '1') {
+  //      // digitalWrite(ledPin, HIGH); // turn the LED on
+  //      ledState = !ledState; //flip the ledState
+  //      digitalWrite(ledPin, ledState);
+  //    }
+  //    delay(10); // Wait 10 milliseconds for next reading
+  //  } else {
+  //    Serial.println("Hello, world!"); //send back a hello world
+  //    delay(50);
+  //  }
 
-//    if(abs(currentAverage - previousAverage) >= averageDifference) {
-//      previousAverage = currentAverage;
-//      Serial.println("PREVIOUS");
-//      Serial.println(abs(currentAverage - previousAverage));
-//    } else {
-//      Serial.println("========PREVIOUS=======");
-//      Serial.println(abs(currentAverage - previousAverage));
-//      return;
-//    }
-//
-//    mapSonarPosition(array.getMinIndex(), 50);
-
-//    fade(10);
-    
-//    Serial.print(", ");
-//    Serial.print("d5: ");
-//    Serial.println(distanceFive);
-    
   }
-
-//  Serial.println("Hello, world!");
-//  
-//  if (Serial.available()) { 
-//    val = Serial.read(); // read it and store it in val
-//  
-//    if (val == '1') {
-//      // digitalWrite(ledPin, HIGH); // turn the LED on
-//      ledState = !ledState; //flip the ledState
-//      digitalWrite(ledPin, ledState);
-//    }
-//    delay(10); // Wait 10 milliseconds for next reading
-//  } else {
-//    Serial.println("Hello, world!"); //send back a hello world
-//    delay(50);
-//  }
 }
 
 int checkDistance(int distance) {
@@ -523,8 +588,6 @@ uint32_t Wheel(byte WheelPos) {
 }
 
 
-
-
 // SUDO CODE
 // Some gravity maths :
 // https://codebender.cc/sketch:56734#BouncingBalls2014.ino
@@ -557,4 +620,15 @@ uint32_t Wheel(byte WheelPos) {
 // if there isn't anyone near{
   // slowly inch down one , 5, 10 steps at a time and update the leds
 // }
+
+
+//  Original hex values 
+// ========================
+//  strip.setPixelColor(pos - 3, 0x100000); // Dark red
+//  strip.setPixelColor(pos - 2, 0x800000); // Dark red
+//  strip.setPixelColor(pos - 1, 0xF00000); // Medium red
+//  strip.setPixelColor(pos    , 0xFF0000); // Center pixel is brightest
+//  strip.setPixelColor(pos + 1, 0xF00000); // Medium red
+//  strip.setPixelColor(pos + 2, 0x800000); // Dark red
+//  strip.setPixelColor(pos + 3, 0x100000); // Dark red
 
