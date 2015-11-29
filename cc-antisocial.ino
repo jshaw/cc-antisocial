@@ -31,6 +31,9 @@ int dir = 1;
 int previousMinIndex = 0;
 int lowBase = 0;
 
+int defaultColor[4] = {16, 90, 160, 255};
+int currentColor[4] = {16, 90, 160, 255};
+
 // Init an Ultrasonic object
 // ===========================
 // TODO: Put these inits and declarations into an array
@@ -106,18 +109,14 @@ void setup() {
    Serial.print("\tAverage value:");
    Serial.print(array.getAverage());
    Serial.println();
+
+//   delay(1000);
    
 }
 
 void loop() {
-
-  // Some example procedures showing how to display to the pixels:
-//  colorWipe(strip.Color(255, 0, 0), 50); // Red
-//  colorWipe(strip.Color(0, 255, 0), 50); // Green
-//  colorWipe(strip.Color(0, 0, 255), 50); // Blue
-
+  
   unsigned long currentMillis = millis();
-
 //  Serial.println(currentMillis);
   
   // SENSORS
@@ -129,19 +128,94 @@ void loop() {
 
   int j;
   int minIndex = array.getMinIndex();
+  int minNum = array.getMin();
+
+
+//  Serial.println();
+//  Serial.println(currentColor[3]);
+//  Serial.println();
+  
+
+  if (minNum == 0){
+    // roll up the motors
+    // fade the lights
+    Serial.println("Waiting for the sonars to start detecting");
+    Serial.println(minNum);
+  } else if (minNum > 0 && minNum < 20){
+    // roll up the motors
+    // fade the lights
+    if (currentColor[0] > 0){
+      currentColor[0] -= 2;
+    }
+
+    if (currentColor[1] > 0){
+      currentColor[1] -= 2;
+    }
+
+    if (currentColor[2] > 0){
+      currentColor[2] -= 2;
+    }
+
+    if (currentColor[3] > 0){
+      currentColor[3] -= 2;
+    }
+    
+//    strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Darkest red
+//    strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+//    strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+//    strip.setPixelColor(pos    , strip.Color(currentColor[3], 0, 0)); // Center pixel is brightest
+//    strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+//    strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+//    strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Darkest red  
+////    return;
+  } else if (minNum > 19) {
+    if (currentColor[0] < defaultColor[0]){
+      currentColor[0] += 1;
+    }
+
+    if (currentColor[1] < defaultColor[1]){
+      currentColor[1] += 1;
+    }
+
+    if (currentColor[2] < defaultColor[2]){
+      currentColor[2] += 1;
+    }
+
+    if (currentColor[3] < defaultColor[3]){
+      currentColor[3] += 1;
+    }
+    
+  }  
    
   // Draw 5 pixels centered on pos.  setPixelColor() will clip any
   // pixels off the ends of the strip, we don't need to watch for that.
-  strip.setPixelColor(pos - 3, 0x100000); // Dark red
-  strip.setPixelColor(pos - 2, 0x500000); // Dark red
-  strip.setPixelColor(pos - 1, 0x900000); // Medium red
-  strip.setPixelColor(pos    , 0xFF0000); // Center pixel is brightest
-  strip.setPixelColor(pos + 1, 0x900000); // Medium red
-  strip.setPixelColor(pos + 2, 0x500000); // Dark red
-  strip.setPixelColor(pos + 3, 0x100000); // Dark red
+//  
+//  strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Darkest red
+//  strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+//  strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+//  strip.setPixelColor(pos    , strip.Color(currentColor[3], 0, 0)); // Center pixel is brightest
+//  strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+//  strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+//  strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Darkest red
+
+//  strip.setPixelColor(pos - 3, 0x100000); // Dark red
+//  strip.setPixelColor(pos - 2, 0x800000); // Dark red
+//  strip.setPixelColor(pos - 1, 0xF00000); // Medium red
+//  strip.setPixelColor(pos    , 0xFF0000); // Center pixel is brightest
+//  strip.setPixelColor(pos + 1, 0xF00000); // Medium red
+//  strip.setPixelColor(pos + 2, 0x800000); // Dark red
+//  strip.setPixelColor(pos + 3, 0x100000); // Dark red
+
+  strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+  strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+  strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+  strip.setPixelColor(pos    , strip.Color(currentColor[3], 0 , 0)); // Center pixel is brightest
+  strip.setPixelColor(pos + 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+  strip.setPixelColor(pos + 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+  strip.setPixelColor(pos + 3, strip.Color(currentColor[0], 0, 0)); // Dark red
  
   strip.show();
-//  delay(30);
+  //  delay(30);
  
   // Rather than being sneaky and erasing just the tail pixel,
   // it's easier to erase it all and draw a new one next time.
@@ -166,36 +240,6 @@ void loop() {
   } else if(pos > lowBase){
     pos--;  
   }
-
-  //  DO STUFF HERE
-//  pos += dir;
-//  if (previousMinIndex > minIndex){
-//    if(pos < lowBase) {
-//      pos += dir;
-////      pos = -1;
-////      dir = -dir;
-//    }
-////    pos = 1;
-////    dir = -dir;
-//  } else if(previousMinIndex > minIndex){
-//    if(pos > lowBase) {
-//      pos -= dir;
-//    }
-////    pos = 1;
-////    dir = -dir;
-//  } else {
-//    // DO NOTHING
-//  }
-
-  // Bounce off ends of strip
-//  pos += dir;
-//  if(pos < 0) {
-//    pos = 1;
-//    dir = -dir;
-//  } else if(pos >= strip.numPixels()) {
-//    pos = strip.numPixels() - 2;
-//    dir = -dir;
-//  }
 
   previousMinIndex = minIndex;
 
