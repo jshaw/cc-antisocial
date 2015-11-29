@@ -160,14 +160,6 @@ void loop() {
       currentColor[3] -= 2;
     }
     
-//    strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Darkest red
-//    strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-//    strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-//    strip.setPixelColor(pos    , strip.Color(currentColor[3], 0, 0)); // Center pixel is brightest
-//    strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-//    strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-//    strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Darkest red  
-////    return;
   } else if (minNum > 19) {
     if (currentColor[0] < defaultColor[0]){
       currentColor[0] += 1;
@@ -186,18 +178,8 @@ void loop() {
     }
     
   }  
-   
-  // Draw 5 pixels centered on pos.  setPixelColor() will clip any
-  // pixels off the ends of the strip, we don't need to watch for that.
-//  
-//  strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Darkest red
-//  strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-//  strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-//  strip.setPixelColor(pos    , strip.Color(currentColor[3], 0, 0)); // Center pixel is brightest
-//  strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-//  strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-//  strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Darkest red
 
+//  Original hex values 
 //  strip.setPixelColor(pos - 3, 0x100000); // Dark red
 //  strip.setPixelColor(pos - 2, 0x800000); // Dark red
 //  strip.setPixelColor(pos - 1, 0xF00000); // Medium red
