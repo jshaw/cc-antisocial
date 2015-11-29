@@ -12,3 +12,6 @@ http://arduinobasics.blogspot.ca/2015/07/neopixel-playground.html
 https://learn.adafruit.com/neopixels-and-servos
 
 http://arduino.stackexchange.com/questions/736/digital-rgb-led-animation
+
+https://github.com/fibonacci162/LEDs
+http://fastled.io/
