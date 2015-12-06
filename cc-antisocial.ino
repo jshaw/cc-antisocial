@@ -3,9 +3,9 @@
   #include <avr/power.h>
 #endif
 
-#include <Ultrasonic.h>
+//#include <Ultrasonic.h>
+#include <NewPing.h>
 #include <Array.h>
-
 
 // MOTOR SHIELD
 #include <AccelStepper.h>
@@ -19,7 +19,7 @@ Adafruit_MotorShield AFMStop(0x60); // Default address, no jumpers
 // Connect two steppers with 200 steps per revolution (1.8 degree)
 // to the top shield
 Adafruit_StepperMotor *myStepper1 = AFMStop.getStepper(200, 1);
-//Adafruit_StepperMotor *myStepper2 = AFMStop.getStepper(200, 2);
+Adafruit_StepperMotor *myStepper2 = AFMStop.getStepper(200, 2);
 
 // you can change these to DOUBLE or INTERLEAVE or MICROSTEP!
 // wrappers for the first motor!
@@ -29,17 +29,18 @@ void forwardstep1() {
 void backwardstep1() {  
   myStepper1->onestep(BACKWARD, SINGLE);
 }
+
 // wrappers for the second motor!
-//void forwardstep2() {  
-//  myStepper2->onestep(FORWARD, DOUBLE);
-//}
-//void backwardstep2() {  
-//  myStepper2->onestep(BACKWARD, DOUBLE);
-//}
+void forwardstep2() {  
+  myStepper2->onestep(FORWARD, DOUBLE);
+}
+void backwardstep2() {  
+  myStepper2->onestep(BACKWARD, DOUBLE);
+}
 
 // Now we'll wrap the 2 steppers in an AccelStepper object
 AccelStepper stepper1(forwardstep1, backwardstep1);
-//AccelStepper stepper2(forwardstep2, backwardstep2);
+AccelStepper stepper2(forwardstep2, backwardstep2);
 
 
 
@@ -77,12 +78,28 @@ int currentColor[4] = {16, 90, 160, 255};
 // Init an Ultrasonic object
 // ===========================
 // TODO: Put these inits and declarations into an array
+//
+//Ultrasonic ultrasonicOne(3, 2);
+//Ultrasonic ultrasonicTwo(5, 4);
+//Ultrasonic ultrasonicThree(7, 6);
+//Ultrasonic ultrasonicFour(9, 8);
+//Ultrasonic ultrasonicFive(11, 10);
 
-Ultrasonic ultrasonicOne(3, 2);
-Ultrasonic ultrasonicTwo(5, 4);
-Ultrasonic ultrasonicThree(7, 6);
-Ultrasonic ultrasonicFour(9, 8);
-Ultrasonic ultrasonicFive(11, 10);
+#define SONAR_NUM     5 // Number of sensors.
+#define MAX_DISTANCE 400 // Maximum distance (in cm) to ping.
+#define PING_INTERVAL 500 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
+
+unsigned long pingTimer[SONAR_NUM]; // Holds the times when the next ping should happen for each sensor.
+unsigned int cm[SONAR_NUM];         // Where the ping distances are stored.
+uint8_t currentSensor = 0;          // Keeps track of which sensor is active.
+
+NewPing sonar[SONAR_NUM] = {     // Sensor object array.
+  NewPing(3, 2, MAX_DISTANCE), // Each sensor's trigger pin, echo pin, and max distance to ping.
+  NewPing(5, 4, MAX_DISTANCE),
+  NewPing(7, 6, MAX_DISTANCE),
+  NewPing(9, 8, MAX_DISTANCE),
+  NewPing(11, 10, MAX_DISTANCE)
+};
 
 int distanceOne = 0;
 int distanceTwo = 0;
@@ -96,12 +113,8 @@ int distanceMapThree = 0;
 int distanceMapFour = 0;
 int distanceMapFive = 0;
 
-//const byte size = 10;
-//int sensorArrayValue[3];
-//Array<int> array = Array<int>(sensorArrayValue, size);
-
 const byte size = 5;
-int rawArray[size] = {1,2,3,4};
+int rawArray[size] = {1,2,3,4,5};
 int sensorArrayValue[size];
 Array<int> array = Array<int>(sensorArrayValue, size);
 
@@ -127,6 +140,18 @@ void setup() {
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT); // Set pin as OUTPUT
 
+
+
+
+
+  pingTimer[0] = millis() + 75;           // First ping starts at 75ms, gives time for the Arduino to chill before starting.
+  for (uint8_t i = 1; i < SONAR_NUM; i++) // Set the starting time for each sensor.
+    pingTimer[i] = pingTimer[i - 1] + PING_INTERVAL;
+
+
+
+
+
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
   #if defined (__AVR_ATtiny85__)
     if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
@@ -138,11 +163,11 @@ void setup() {
   
   // send a byte to establish contact until receiver responds 
   //  establishContact();
-
-   for (byte i=0; i<array.size(); i++){
-  //   Serial.print(array);
-  //   Serial.print(", ");
-   }
+//
+//   for (byte i=0; i<array.size(); i++){
+//  //   Serial.print(array);
+//  //   Serial.print(", ");
+//   }
 //   Serial.println("\nSpecial functionality:");
 //   Serial.print("\tMinimum value:");
 //   Serial.print(array.getMin());
@@ -156,16 +181,42 @@ void setup() {
 
   AFMSbot.begin(); // Start the bottom shield
   AFMStop.begin(); // Start the top shield
-   
+
   stepper1.setMaxSpeed(200.0);
   stepper1.setAcceleration(100.0);
-  stepper1.moveTo(24);
+////  stepper1.moveTo(24);
+  stepper1.moveTo(50);
     
-//  stepper2.setMaxSpeed(200.0);
-//  stepper2.setAcceleration(100.0);
+  stepper2.setMaxSpeed(200.0);
+  stepper2.setAcceleration(100.0);
 //  stepper2.moveTo(24);
-   
+  stepper2.moveTo(50);  
 }
+
+
+
+void echoCheck() { // If ping received, set the sensor distance to array.
+  if (sonar[currentSensor].check_timer()){
+    cm[currentSensor] = sonar[currentSensor].ping_result / US_ROUNDTRIP_CM;
+  }
+}
+
+void oneSensorCycle() { // Sensor ping cycle complete, do something with the results.
+  // The following code would be replaced with your code that does something with the ping results.
+  for (uint8_t i = 0; i < SONAR_NUM; i++) {
+    sensorArrayValue[i] = cm[i];
+    
+    Serial.print(i);
+    Serial.print("=");
+    Serial.print(cm[i]);
+    Serial.print("cm ");
+  }
+  Serial.println();
+}
+
+
+
+
 
 void loop() {
   unsigned long currentMillis = millis();
@@ -192,22 +243,48 @@ void loop() {
     stepper1.moveTo(-stepper1.currentPosition());
   }
 
-//  if (stepper2.distanceToGo() == 0) {
-//    stepper2.moveTo(-stepper2.currentPosition());
-//  }
+  if (stepper2.distanceToGo() == 0) {
+    stepper2.moveTo(-stepper2.currentPosition());
+  }
 
   stepper1.run();
-//  stepper2.run();
+  stepper2.run();
   
-//  unsigned long currentMillis = millis();
-//  Serial.println(currentMillis);
   
   // SENSORS
-  distanceOne = ultrasonicOne.Ranging(CM);
-  distanceTwo = ultrasonicTwo.Ranging(CM);
-  distanceThree = ultrasonicThree.Ranging(CM);
-  distanceFour = ultrasonicFour.Ranging(CM);
-  distanceFive = ultrasonicFive.Ranging(CM);
+//  distanceOne = ultrasonicOne.Ranging(CM);
+//  distanceTwo = ultrasonicTwo.Ranging(CM);
+//  distanceThree = ultrasonicThree.Ranging(CM);
+//  distanceFour = ultrasonicFour.Ranging(CM);
+//  distanceFive = ultrasonicFive.Ranging(CM);
+
+  // Loop through all the sensors.
+  for (uint8_t i = 0; i < SONAR_NUM; i++) {
+    
+    // Is it this sensor's time to ping?
+    if (millis() >= pingTimer[i]) {
+      
+      // Set next time this sensor will be pinged.
+      pingTimer[i] += PING_INTERVAL * SONAR_NUM;
+      
+      // Sensor ping cycle complete, do something with the results.
+      if (i == 0 && currentSensor == SONAR_NUM - 1) oneSensorCycle();
+      
+      // Make sure previous timer is canceled before starting a new ping (insurance).
+      sonar[currentSensor].timer_stop();
+      
+      // Sensor being accessed.
+      currentSensor = i;
+      
+      // Make distance zero in case there's no ping echo for this sensor.
+      cm[currentSensor] = 0;
+      
+      // Do the ping (processing continues, interrupt will call echoCheck to look for echo).
+      sonar[currentSensor].ping_timer(echoCheck);
+    }
+  }
+
+
 
   int j;
   int minIndex = array.getMinIndex();
@@ -251,12 +328,12 @@ void loop() {
 //  #TODO: put this into a function as well as the thing below
 // when the distance gets too large, should either fade out or reset by 
 // going to position one and than do default mode stuff    
-    sensorArrayValue[0] = checkDistance(distanceOne);
-    sensorArrayValue[1] = checkDistance(distanceTwo);
-    sensorArrayValue[2] = checkDistance(distanceThree);
-    sensorArrayValue[3] = checkDistance(distanceFour);
-    sensorArrayValue[4] = checkDistance(distanceFive);
-    
+//    sensorArrayValue[0] = checkDistance(distanceOne);
+//    sensorArrayValue[1] = checkDistance(distanceTwo);
+//    sensorArrayValue[2] = checkDistance(distanceThree);
+//    sensorArrayValue[3] = checkDistance(distanceFour);
+//    sensorArrayValue[4] = checkDistance(distanceFive);
+//    
     return;
   } else {
 
@@ -380,13 +457,13 @@ void loop() {
       Serial.print("d5: ");
       Serial.println(checkDistance(distanceFive));
       
-      sensorArrayValue[0] = checkDistance(distanceOne);
-      sensorArrayValue[1] = checkDistance(distanceTwo);
-      sensorArrayValue[2] = checkDistance(distanceThree);
-      sensorArrayValue[3] = checkDistance(distanceFour);
-      sensorArrayValue[4] = checkDistance(distanceFive);
-  
-      Array<int> array = Array<int>(sensorArrayValue, size);
+//      sensorArrayValue[0] = checkDistance(distanceOne);
+//      sensorArrayValue[1] = checkDistance(distanceTwo);
+//      sensorArrayValue[2] = checkDistance(distanceThree);
+//      sensorArrayValue[3] = checkDistance(distanceFour);
+//      sensorArrayValue[4] = checkDistance(distanceFive);
+//  
+//      Array<int> array = Array<int>(sensorArrayValue, size);
 //      Serial.print("MIN VALUE: ");
 //      Serial.println(array.getMin());
 //      Serial.print("MIN INDEX: ");
@@ -528,21 +605,21 @@ void fadeStep(uint8_t wait) {
 }
 
 void mapSonarPosition(int quator, uint8_t wait) {
-  Serial.print("============");
-  Serial.print(quator);
-  Serial.println("------------");
-  
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    if(i >= (quator * 7) && i <= (quator * 7 + 7)){
-      strip.setPixelColor(i, strip.Color(127, 127, 127));
-      strip.show();
-//      delay(wait);
-    } else {
-      strip.setPixelColor(i, strip.Color(0, 0, 0));
-      strip.show();
-    }
-
-  }
+//  Serial.print("============");
+//  Serial.print(quator);
+//  Serial.println("------------");
+//  
+//  for(uint16_t i=0; i<strip.numPixels(); i++) {
+//    if(i >= (quator * 7) && i <= (quator * 7 + 7)){
+//      strip.setPixelColor(i, strip.Color(127, 127, 127));
+//      strip.show();
+////      delay(wait);
+//    } else {
+//      strip.setPixelColor(i, strip.Color(0, 0, 0));
+//      strip.show();
+//    }
+//
+//  }
     
 //    strip.setPixelColor(, strip.Color(127, 127, 127));
 //    strip.show();
