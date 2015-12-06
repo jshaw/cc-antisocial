@@ -77,11 +77,12 @@ int currentColor[4] = {16, 90, 160, 255};
 // Init an Ultrasonic object
 // ===========================
 // TODO: Put these inits and declarations into an array
-Ultrasonic ultrasonicOne(9, 8);
-Ultrasonic ultrasonicTwo(7, 6);
-Ultrasonic ultrasonicThree(5, 4);
-Ultrasonic ultrasonicFour(3, 2);
-//Ultrasonic ultrasonicFive(10, 9);
+
+Ultrasonic ultrasonicOne(3, 2);
+Ultrasonic ultrasonicTwo(5, 4);
+Ultrasonic ultrasonicThree(7, 6);
+Ultrasonic ultrasonicFour(9, 8);
+Ultrasonic ultrasonicFive(11, 10);
 
 int distanceOne = 0;
 int distanceTwo = 0;
@@ -99,8 +100,8 @@ int distanceMapFive = 0;
 //int sensorArrayValue[3];
 //Array<int> array = Array<int>(sensorArrayValue, size);
 
-const byte size = 4;
-int rawArray[size] = {1,2,3};
+const byte size = 5;
+int rawArray[size] = {1,2,3,4};
 int sensorArrayValue[size];
 Array<int> array = Array<int>(sensorArrayValue, size);
 
@@ -206,7 +207,7 @@ void loop() {
   distanceTwo = ultrasonicTwo.Ranging(CM);
   distanceThree = ultrasonicThree.Ranging(CM);
   distanceFour = ultrasonicFour.Ranging(CM);
-//  distanceFive = ultrasonicFive.Ranging(CM);
+  distanceFive = ultrasonicFive.Ranging(CM);
 
   int j;
   int minIndex = array.getMinIndex();
@@ -254,6 +255,7 @@ void loop() {
     sensorArrayValue[1] = checkDistance(distanceTwo);
     sensorArrayValue[2] = checkDistance(distanceThree);
     sensorArrayValue[3] = checkDistance(distanceFour);
+    sensorArrayValue[4] = checkDistance(distanceFive);
     
     return;
   } else {
@@ -363,22 +365,26 @@ void loop() {
     if(currentMillis - previousMillis >= interval) {
       previousMillis = currentMillis;  
       
-//      Serial. print("d1: ");
-//      Serial.print(checkDistance(distanceOne));
-//      Serial.print(", ");
-//      Serial.print("d2: ");
-//      Serial.print(checkDistance(distanceTwo));
-//      Serial.print(", ");
-//      Serial.print("d3: ");
-//      Serial.print(checkDistance(distanceThree));
-//      Serial.print(", ");
-//      Serial.print("d4: ");
-//      Serial.println(checkDistance(distanceFour));
+      Serial.print("d1: ");
+      Serial.print(checkDistance(distanceOne));
+      Serial.print(", ");
+      Serial.print("d2: ");
+      Serial.print(checkDistance(distanceTwo));
+      Serial.print(", ");
+      Serial.print("d3: ");
+      Serial.print(checkDistance(distanceThree));
+      Serial.print(", ");
+      Serial.print("d4: ");
+      Serial.print(checkDistance(distanceFour));
+      Serial.print(", ");
+      Serial.print("d5: ");
+      Serial.println(checkDistance(distanceFive));
       
       sensorArrayValue[0] = checkDistance(distanceOne);
       sensorArrayValue[1] = checkDistance(distanceTwo);
       sensorArrayValue[2] = checkDistance(distanceThree);
       sensorArrayValue[3] = checkDistance(distanceFour);
+      sensorArrayValue[4] = checkDistance(distanceFive);
   
       Array<int> array = Array<int>(sensorArrayValue, size);
 //      Serial.print("MIN VALUE: ");
