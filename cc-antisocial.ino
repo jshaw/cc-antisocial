@@ -24,10 +24,10 @@ Adafruit_StepperMotor *myStepper2 = AFMStop.getStepper(200, 2);
 // you can change these to DOUBLE or INTERLEAVE or MICROSTEP!
 // wrappers for the first motor!
 void forwardstep1() {  
-  myStepper1->onestep(FORWARD, SINGLE);
+  myStepper1->onestep(FORWARD, DOUBLE);
 }
 void backwardstep1() {  
-  myStepper1->onestep(BACKWARD, SINGLE);
+  myStepper1->onestep(BACKWARD, DOUBLE);
 }
 
 // wrappers for the second motor!
@@ -79,7 +79,7 @@ int currentColor[4] = {16, 90, 160, 255};
 // ===========================
 #define SONAR_NUM     5 // Number of sensors.
 #define MAX_DISTANCE 500 // Maximum distance (in cm) to ping.
-#define PING_INTERVAL 100 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
+#define PING_INTERVAL 500 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
 
 unsigned long pingTimer[SONAR_NUM]; // Holds the times when the next ping should happen for each sensor.
 unsigned int cm[SONAR_NUM];         // Where the ping distances are stored.
@@ -151,24 +151,17 @@ void setup() {
   
   // send a byte to establish contact until receiver responds 
   //  establishContact();
-//
-//   for (byte i=0; i<array.size(); i++){
-//  //   Serial.print(array);
-//  //   Serial.print(", ");
-//   }
-//   Serial.println("\nSpecial functionality:");
-//   Serial.print("\tMinimum value:");
-//   Serial.print(array.getMin());
-//   Serial.println();
-//   Serial.print("\tMaximum value:");
-//   Serial.print(array.getMax());
-//   Serial.println();
-//   Serial.print("\tAverage value:");
-//   Serial.print(array.getAverage());
-//   Serial.println();
 
   AFMSbot.begin(); // Start the bottom shield
   AFMStop.begin(); // Start the top shield
+
+  //  INCHES
+  // 12 steps = 1"
+  // 131 steps = 1'
+
+  // CM
+  // 5 steps = 1cm
+  
 
   stepper1.setMaxSpeed(200.0);
   stepper1.setAcceleration(100.0);
@@ -178,7 +171,7 @@ void setup() {
   stepper2.setMaxSpeed(200.0);
   stepper2.setAcceleration(100.0);
 //  stepper2.moveTo(24);
-  stepper2.moveTo(50);  
+  stepper2.moveTo(50);
 }
 
 
@@ -223,13 +216,13 @@ void loop() {
 
   // STEPPER 
   // Change direction at the limits
-  if (stepper1.distanceToGo() == 0){
-    stepper1.moveTo(-stepper1.currentPosition());
-  }
-
-  if (stepper2.distanceToGo() == 0) {
-    stepper2.moveTo(-stepper2.currentPosition());
-  }
+//  if (stepper1.distanceToGo() == 0){
+//    stepper1.moveTo(-stepper1.currentPosition());
+//  }
+//
+//  if (stepper2.distanceToGo() == 0) {
+//    stepper2.moveTo(-stepper2.currentPosition());
+//  }
 
   stepper1.run();
   stepper2.run();
@@ -312,14 +305,10 @@ void loop() {
 //    
     return;
   } else {
-
-  //  Serial.println();
-  //  Serial.println(currentColor[3]);
-  //  Serial.println();
     
     //  Waiting for the sonars to start to work
     if (minNum == 0){
-//      Serial.println("Waiting for the sonars to start detecting");
+      //  Serial.println("Waiting for the sonars to start detecting");
     } else if (minNum > 0 && minNum < 20){
       // roll up the motors
       
