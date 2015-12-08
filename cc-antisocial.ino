@@ -3,7 +3,6 @@
   #include <avr/power.h>
 #endif
 
-//#include <Ultrasonic.h>
 #include <NewPing.h>
 #include <Array.h>
 
@@ -242,7 +241,7 @@ void loop() {
     for(j=-3; j<= 3; j++) { 
       strip.setPixelColor(pos2+j, 0);
     }
-    
+
     // Bounce off ends of strip
     pos2 += dir2;
     if(pos2 < 0) {
