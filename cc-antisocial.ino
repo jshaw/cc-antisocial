@@ -60,7 +60,7 @@ AccelStepper stepper2(forwardstep2, backwardstep2);
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
 
 // Position & direction of bar
 int pos = 0;
@@ -86,7 +86,7 @@ int currentColor[4] = {16, 90, 160, 255};
 //Ultrasonic ultrasonicFive(11, 10);
 
 #define SONAR_NUM     5 // Number of sensors.
-#define MAX_DISTANCE 400 // Maximum distance (in cm) to ping.
+#define MAX_DISTANCE 500 // Maximum distance (in cm) to ping.
 #define PING_INTERVAL 500 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
 
 unsigned long pingTimer[SONAR_NUM]; // Holds the times when the next ping should happen for each sensor.
@@ -94,11 +94,12 @@ unsigned int cm[SONAR_NUM];         // Where the ping distances are stored.
 uint8_t currentSensor = 0;          // Keeps track of which sensor is active.
 
 NewPing sonar[SONAR_NUM] = {     // Sensor object array.
-  NewPing(3, 2, MAX_DISTANCE), // Each sensor's trigger pin, echo pin, and max distance to ping.
-  NewPing(5, 4, MAX_DISTANCE),
-  NewPing(7, 6, MAX_DISTANCE),
-  NewPing(9, 8, MAX_DISTANCE),
-  NewPing(11, 10, MAX_DISTANCE)
+  // Each sensor's trigger pin, echo pin, and max distance to ping.
+  NewPing(2, 3, MAX_DISTANCE),
+  NewPing(4, 5, MAX_DISTANCE),
+  NewPing(6, 7, MAX_DISTANCE),
+  NewPing(8, 9, MAX_DISTANCE),
+  NewPing(10, 13, MAX_DISTANCE)
 };
 
 int distanceOne = 0;
@@ -140,17 +141,12 @@ void setup() {
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT); // Set pin as OUTPUT
 
-
-
-
-
-  pingTimer[0] = millis() + 75;           // First ping starts at 75ms, gives time for the Arduino to chill before starting.
-  for (uint8_t i = 1; i < SONAR_NUM; i++) // Set the starting time for each sensor.
+  // First ping starts at 75ms, gives time for the Arduino to chill before starting.
+  pingTimer[0] = millis() + 75;
+  // Set the starting time for each sensor.
+  for (uint8_t i = 1; i < SONAR_NUM; i++) {
     pingTimer[i] = pingTimer[i - 1] + PING_INTERVAL;
-
-
-
-
+  }
 
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
   #if defined (__AVR_ATtiny85__)
@@ -442,20 +438,20 @@ void loop() {
     if(currentMillis - previousMillis >= interval) {
       previousMillis = currentMillis;  
       
-      Serial.print("d1: ");
-      Serial.print(checkDistance(distanceOne));
-      Serial.print(", ");
-      Serial.print("d2: ");
-      Serial.print(checkDistance(distanceTwo));
-      Serial.print(", ");
-      Serial.print("d3: ");
-      Serial.print(checkDistance(distanceThree));
-      Serial.print(", ");
-      Serial.print("d4: ");
-      Serial.print(checkDistance(distanceFour));
-      Serial.print(", ");
-      Serial.print("d5: ");
-      Serial.println(checkDistance(distanceFive));
+//      Serial.print("d1: ");
+//      Serial.print(checkDistance(distanceOne));
+//      Serial.print(", ");
+//      Serial.print("d2: ");
+//      Serial.print(checkDistance(distanceTwo));
+//      Serial.print(", ");
+//      Serial.print("d3: ");
+//      Serial.print(checkDistance(distanceThree));
+//      Serial.print(", ");
+//      Serial.print("d4: ");
+//      Serial.print(checkDistance(distanceFour));
+//      Serial.print(", ");
+//      Serial.print("d5: ");
+//      Serial.println(checkDistance(distanceFive));
       
 //      sensorArrayValue[0] = checkDistance(distanceOne);
 //      sensorArrayValue[1] = checkDistance(distanceTwo);
