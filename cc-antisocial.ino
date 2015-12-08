@@ -87,7 +87,7 @@ int currentColor[4] = {16, 90, 160, 255};
 
 #define SONAR_NUM     5 // Number of sensors.
 #define MAX_DISTANCE 500 // Maximum distance (in cm) to ping.
-#define PING_INTERVAL 500 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
+#define PING_INTERVAL 100 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
 
 unsigned long pingTimer[SONAR_NUM]; // Holds the times when the next ping should happen for each sensor.
 unsigned int cm[SONAR_NUM];         // Where the ping distances are stored.
@@ -134,7 +134,6 @@ int ledPin = 12; // Set the pin to digital I/O 13
 boolean ledState = LOW; //to toggle our LED
 const long serialInterval = 50;
 unsigned long previousSerialMillis = 0;
-
 
 void setup() {
   //initialize serial communications at a 9600 baud rate
@@ -190,7 +189,6 @@ void setup() {
 }
 
 
-
 void echoCheck() { // If ping received, set the sensor distance to array.
   if (sonar[currentSensor].check_timer()){
     cm[currentSensor] = sonar[currentSensor].ping_result / US_ROUNDTRIP_CM;
@@ -209,9 +207,6 @@ void oneSensorCycle() { // Sensor ping cycle complete, do something with the res
   }
   Serial.println();
 }
-
-
-
 
 
 void loop() {
@@ -246,14 +241,7 @@ void loop() {
   stepper1.run();
   stepper2.run();
   
-  
   // SENSORS
-//  distanceOne = ultrasonicOne.Ranging(CM);
-//  distanceTwo = ultrasonicTwo.Ranging(CM);
-//  distanceThree = ultrasonicThree.Ranging(CM);
-//  distanceFour = ultrasonicFour.Ranging(CM);
-//  distanceFive = ultrasonicFive.Ranging(CM);
-
   // Loop through all the sensors.
   for (uint8_t i = 0; i < SONAR_NUM; i++) {
     
@@ -287,7 +275,7 @@ void loop() {
   int minNum = array.getMin();
   int disAverage = array.getAverage();
   
-  if(disAverage > 120){
+  if(disAverage > 420){
     // switch modes
     // loop through and dop fun things like no one is watching
     // low yourself from the ceiling
@@ -303,7 +291,7 @@ void loop() {
     strip.setPixelColor(pos2 + 2, strip.Color(defaultColor[1], 0, 0)); // Dark red
     strip.setPixelColor(pos2 + 3, strip.Color(defaultColor[0], 0, 0)); // Dark red
     
-    strip.show();
+//    strip.show();
     
     // Rather than being sneaky and erasing just the tail pixel,
     // it's easier to erase it all and draw a new one next time.
@@ -324,11 +312,11 @@ void loop() {
 //  #TODO: put this into a function as well as the thing below
 // when the distance gets too large, should either fade out or reset by 
 // going to position one and than do default mode stuff    
-//    sensorArrayValue[0] = checkDistance(distanceOne);
-//    sensorArrayValue[1] = checkDistance(distanceTwo);
-//    sensorArrayValue[2] = checkDistance(distanceThree);
-//    sensorArrayValue[3] = checkDistance(distanceFour);
-//    sensorArrayValue[4] = checkDistance(distanceFive);
+    sensorArrayValue[0] = checkDistance(cm[0]);
+    sensorArrayValue[1] = checkDistance(cm[1]);
+    sensorArrayValue[2] = checkDistance(cm[2]);
+    sensorArrayValue[3] = checkDistance(cm[3]);
+    sensorArrayValue[4] = checkDistance(cm[4]);
 //    
     return;
   } else {
@@ -372,6 +360,13 @@ void loop() {
           currentColor[3] = 0;
         }
       }
+
+      if (currentColor[4] > 0){
+        currentColor[4] -= 10;
+        if(currentColor[4] < 0){
+          currentColor[4] = 0;
+        }
+      }
       
     } else if (minNum > 19) {
       if (currentColor[0] < defaultColor[0]){
@@ -388,6 +383,10 @@ void loop() {
   
       if (currentColor[3] < defaultColor[3]){
         currentColor[3] += 1;
+      }
+
+      if (currentColor[4] < defaultColor[4]){
+        currentColor[4] += 1;
       }
       
     }  
@@ -412,17 +411,22 @@ void loop() {
     currentAverage = array.getAverage();
     if((abs(currentAverage - previousAverage) >= averageDifferenceLow) || (abs(currentAverage - previousAverage) <= averageDifferenceHigh)) {
       previousAverage = currentAverage;
-      
+
+      // 60 / 5 = 12
+      // 12 / 2 = = 6
       if(minIndex == 0){
-        lowBase = 3;
+//        lowBase = 3;
+        lowBase = 6;
       } else if (minIndex == 1){
-        lowBase = 10;
+        lowBase = 18;
       } else if(minIndex == 2) {
-        lowBase = 19;
+        lowBase = 30;
       } else if(minIndex == 3) {
-        lowBase = 26;
+        lowBase = 42;
+      } else if(minIndex == 4) {
+        lowBase = 54;
       } else {
-        lowBase = 26;
+        lowBase = 54;
       }
       
     }
@@ -438,34 +442,34 @@ void loop() {
     if(currentMillis - previousMillis >= interval) {
       previousMillis = currentMillis;  
       
-//      Serial.print("d1: ");
-//      Serial.print(checkDistance(distanceOne));
-//      Serial.print(", ");
-//      Serial.print("d2: ");
-//      Serial.print(checkDistance(distanceTwo));
-//      Serial.print(", ");
-//      Serial.print("d3: ");
-//      Serial.print(checkDistance(distanceThree));
-//      Serial.print(", ");
-//      Serial.print("d4: ");
-//      Serial.print(checkDistance(distanceFour));
-//      Serial.print(", ");
-//      Serial.print("d5: ");
-//      Serial.println(checkDistance(distanceFive));
+      Serial.print("d1: ");
+      Serial.print(checkDistance(cm[0]));
+      Serial.print(", ");
+      Serial.print("d2: ");
+      Serial.print(checkDistance(cm[1]));
+      Serial.print(", ");
+      Serial.print("d3: ");
+      Serial.print(checkDistance(cm[2]));
+      Serial.print(", ");
+      Serial.print("d4: ");
+      Serial.print(checkDistance(cm[3]));
+      Serial.print(", ");
+      Serial.print("d5: ");
+      Serial.println(checkDistance(cm[4]));
       
-//      sensorArrayValue[0] = checkDistance(distanceOne);
-//      sensorArrayValue[1] = checkDistance(distanceTwo);
-//      sensorArrayValue[2] = checkDistance(distanceThree);
-//      sensorArrayValue[3] = checkDistance(distanceFour);
-//      sensorArrayValue[4] = checkDistance(distanceFive);
-//  
-//      Array<int> array = Array<int>(sensorArrayValue, size);
-//      Serial.print("MIN VALUE: ");
-//      Serial.println(array.getMin());
-//      Serial.print("MIN INDEX: ");
-//      Serial.println(array.getMinIndex());
-//      Serial.print("AVERAGE: ");
-//      Serial.println(array.getAverage());
+      sensorArrayValue[0] = checkDistance(cm[0]);
+      sensorArrayValue[1] = checkDistance(cm[1]);
+      sensorArrayValue[2] = checkDistance(cm[2]);
+      sensorArrayValue[3] = checkDistance(cm[3]);
+      sensorArrayValue[4] = checkDistance(cm[4]);
+    
+      Array<int> array = Array<int>(sensorArrayValue, size);
+      Serial.print("MIN VALUE: ");
+      Serial.println(array.getMin());
+      Serial.print("MIN INDEX: ");
+      Serial.println(array.getMinIndex());
+      Serial.print("AVERAGE: ");
+      Serial.println(array.getAverage());
   
   // PIXEL FOLLOW SONAR
       currentAverage = array.getAverage();
@@ -494,6 +498,8 @@ void loop() {
 
 int checkDistance(int distance) {
   if(distance > 400){
+    return 400;
+  } else if (distance < 3) {
     return 400;
   } else {
     return distance;
