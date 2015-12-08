@@ -21,27 +21,9 @@ Adafruit_MotorShield AFMStop(0x60); // Default address, no jumpers
 Adafruit_StepperMotor *myStepper1 = AFMStop.getStepper(200, 1);
 Adafruit_StepperMotor *myStepper2 = AFMStop.getStepper(200, 2);
 
-// you can change these to DOUBLE or INTERLEAVE or MICROSTEP!
-// wrappers for the first motor!
-void forwardstep1() {  
-  myStepper1->onestep(FORWARD, SINGLE);
-}
-void backwardstep1() {  
-  myStepper1->onestep(BACKWARD, SINGLE);
-}
-
-// wrappers for the second motor!
-void forwardstep2() {  
-  myStepper2->onestep(FORWARD, SINGLE);
-}
-void backwardstep2() {  
-  myStepper2->onestep(BACKWARD, SINGLE);
-}
-
 // Now we'll wrap the 2 steppers in an AccelStepper object
 AccelStepper stepper1(forwardstep1, backwardstep1);
 AccelStepper stepper2(forwardstep2, backwardstep2);
-
 
 // NEOPIXEL init
 // ===========================
@@ -160,27 +142,6 @@ void setup() {
   stepper2.moveTo(-50);
 }
 
-
-void echoCheck() { // If ping received, set the sensor distance to array.
-  if (sonar[currentSensor].check_timer()){
-    cm[currentSensor] = sonar[currentSensor].ping_result / US_ROUNDTRIP_CM;
-  }
-}
-
-void oneSensorCycle() { // Sensor ping cycle complete, do something with the results.
-  // The following code would be replaced with your code that does something with the ping results.
-  for (uint8_t i = 0; i < SONAR_NUM; i++) {
-    sensorArrayValue[i] = cm[i];
-    
-    Serial.print(i);
-    Serial.print("=");
-    Serial.print(cm[i]);
-    Serial.print("cm ");
-  }
-  Serial.println();
-}
-
-
 void loop() {
   unsigned long currentMillis = millis();
 
@@ -264,21 +225,15 @@ void loop() {
   int disAverage = array.getAverage();
 
   // BE CURIOUS
+  // =================
   if(disAverage > 420){
     // switch modes
     // loop through and dop fun things like no one is watching
     // low yourself from the ceiling
     int j;
-   
-    // Draw 5 pixels centered on pos.  setPixelColor() will clip any
-    // pixels off the ends of the strip, we don't need to watch for that.
-    strip.setPixelColor(pos2 - 3, strip.Color(defaultColor[0], 0, 0)); // Dark red
-    strip.setPixelColor(pos2 - 2, strip.Color(defaultColor[1], 0, 0)); // Dark red
-    strip.setPixelColor(pos2 - 1, strip.Color(defaultColor[2], 0, 0)); // Medium red
-    strip.setPixelColor(pos2    , strip.Color(defaultColor[3], 0 , 0)); // Center pixel is brightest
-    strip.setPixelColor(pos2 + 1, strip.Color(defaultColor[2], 0, 0)); // Medium red
-    strip.setPixelColor(pos2 + 2, strip.Color(defaultColor[1], 0, 0)); // Dark red
-    strip.setPixelColor(pos2 + 3, strip.Color(defaultColor[0], 0, 0)); // Dark red
+
+    // Updates and draws new LED positions
+    setLEDPosition(pos2);
     
     strip.show();
     
@@ -369,14 +324,9 @@ void loop() {
         currentColor[4] += 1;
       }
     }  
-  
-    strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Dark red
-    strip.setPixelColor(pos - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-    strip.setPixelColor(pos - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-    strip.setPixelColor(pos    , strip.Color(currentColor[3], 0 , 0)); // Center pixel is brightest
-    strip.setPixelColor(pos + 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-    strip.setPixelColor(pos + 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-    strip.setPixelColor(pos + 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+
+    // Updates and draws new LED positions    
+    setLEDPosition(pos);
    
     strip.show();
     //  delay(30);
@@ -443,6 +393,66 @@ void loop() {
       
       }
   }
+}
+
+// you can change these to DOUBLE or INTERLEAVE or MICROSTEP!
+// wrappers for the first motor!
+void forwardstep1() {  
+  myStepper1->onestep(FORWARD, SINGLE);
+}
+
+void backwardstep1() {  
+  myStepper1->onestep(BACKWARD, SINGLE);
+}
+
+// wrappers for the second motor!
+void forwardstep2() {  
+  myStepper2->onestep(FORWARD, SINGLE);
+}
+
+void backwardstep2() {  
+  myStepper2->onestep(BACKWARD, SINGLE);
+}
+
+void echoCheck() { // If ping received, set the sensor distance to array.
+  if (sonar[currentSensor].check_timer()){
+    cm[currentSensor] = sonar[currentSensor].ping_result / US_ROUNDTRIP_CM;
+  }
+}
+
+void oneSensorCycle() { // Sensor ping cycle complete, do something with the results.
+  // The following code would be replaced with your code that does something with the ping results.
+  for (uint8_t i = 0; i < SONAR_NUM; i++) {
+    sensorArrayValue[i] = cm[i];
+    
+    Serial.print(i);
+    Serial.print("=");
+    Serial.print(cm[i]);
+    Serial.print("cm ");
+  }
+  Serial.println();
+}
+
+// Draw 5 pixels centered on pos.  setPixelColor() will clip any
+// pixels off the ends of the strip, we don't need to watch for that.
+void setLEDPosition(int ledPosition) {
+  strip.setPixelColor(ledPosition - 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+  strip.setPixelColor(ledPosition - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+  strip.setPixelColor(ledPosition - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+  strip.setPixelColor(ledPosition    , strip.Color(currentColor[3], 0 , 0)); // Center pixel is brightest
+  strip.setPixelColor(ledPosition + 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+  strip.setPixelColor(ledPosition + 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+  strip.setPixelColor(ledPosition + 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+
+  //  Original hex values 
+  // ========================
+  //  strip.setPixelColor(pos - 3, 0x100000); // Dark red
+  //  strip.setPixelColor(pos - 2, 0x800000); // Dark red
+  //  strip.setPixelColor(pos - 1, 0xF00000); // Medium red
+  //  strip.setPixelColor(pos    , 0xFF0000); // Center pixel is brightest
+  //  strip.setPixelColor(pos + 1, 0xF00000); // Medium red
+  //  strip.setPixelColor(pos + 2, 0x800000); // Dark red
+  //  strip.setPixelColor(pos + 3, 0x100000); // Dark red
 }
 
 void setSensorArrayValues() {
@@ -706,17 +716,6 @@ uint32_t Wheel(byte WheelPos) {
 // if there isn't anyone near{
   // slowly inch down one , 5, 10 steps at a time and update the leds
 // }
-
-
-//  Original hex values 
-// ========================
-//  strip.setPixelColor(pos - 3, 0x100000); // Dark red
-//  strip.setPixelColor(pos - 2, 0x800000); // Dark red
-//  strip.setPixelColor(pos - 1, 0xF00000); // Medium red
-//  strip.setPixelColor(pos    , 0xFF0000); // Center pixel is brightest
-//  strip.setPixelColor(pos + 1, 0xF00000); // Medium red
-//  strip.setPixelColor(pos + 2, 0x800000); // Dark red
-//  strip.setPixelColor(pos + 3, 0x100000); // Dark red
 
 
 // Programatically lighting up static sections of the LED strip
