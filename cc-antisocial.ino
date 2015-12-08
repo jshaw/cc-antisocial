@@ -94,18 +94,6 @@ NewPing sonar[SONAR_NUM] = {
   NewPing(10, 13, MAX_DISTANCE)
 };
 
-int distanceOne = 0;
-int distanceTwo = 0;
-int distanceThree = 0;
-int distanceFour = 0;
-int distanceFive = 0;
-
-int distanceMapOne = 0;
-int distanceMapTwo = 0;
-int distanceMapThree = 0;
-int distanceMapFour = 0;
-int distanceMapFive = 0;
-
 const byte size = 5;
 int rawArray[size] = {1,2,3,4,5};
 int sensorArrayValue[size];
@@ -310,15 +298,8 @@ void loop() {
       dir2 = -dir2;
     }
 
-//  #TODO: put this into a function as well as the thing below
-// when the distance gets too large, should either fade out or reset by 
-// going to position one and than do default mode stuff    
-//    sensorArrayValue[0] = checkDistance(cm[0]);
-//    sensorArrayValue[1] = checkDistance(cm[1]);
-//    sensorArrayValue[2] = checkDistance(cm[2]);
-//    sensorArrayValue[3] = checkDistance(cm[3]);
-//    sensorArrayValue[4] = checkDistance(cm[4]);
-
+    // Sets the sensor array values
+    // sensorArrayValue[n] = checkDistance(cm[n]);
     setSensorArrayValues();
   
     return;
@@ -387,7 +368,6 @@ void loop() {
       if (currentColor[4] < defaultColor[4]){
         currentColor[4] += 1;
       }
-      
     }  
   
     strip.setPixelColor(pos - 3, strip.Color(currentColor[0], 0, 0)); // Dark red
@@ -414,7 +394,7 @@ void loop() {
       // 60 / 5 = 12
       // 12 / 2 = = 6
       if(minIndex == 0){
-//        lowBase = 3;
+        //  lowBase = 3;
         lowBase = 6;
       } else if (minIndex == 1){
         lowBase = 18;
@@ -427,7 +407,6 @@ void loop() {
       } else {
         lowBase = 54;
       }
-      
     }
   
     if(pos < lowBase){
@@ -439,30 +418,11 @@ void loop() {
     previousMinIndex = minIndex;
   
     if(currentMillis - previousMillis >= interval) {
-      previousMillis = currentMillis;  
-      
-//      Serial.print("d1: ");
-//      Serial.print(checkDistance(cm[0]));
-//      Serial.print(", ");
-//      Serial.print("d2: ");
-//      Serial.print(checkDistance(cm[1]));
-//      Serial.print(", ");
-//      Serial.print("d3: ");
-//      Serial.print(checkDistance(cm[2]));
-//      Serial.print(", ");
-//      Serial.print("d4: ");
-//      Serial.print(checkDistance(cm[3]));
-//      Serial.print(", ");
-//      Serial.print("d5: ");
-//      Serial.println(checkDistance(cm[4]));
+      previousMillis = currentMillis;
 
-        setSensorArrayValues();
-      
-//      sensorArrayValue[0] = checkDistance(cm[0]);
-//      sensorArrayValue[1] = checkDistance(cm[1]);
-//      sensorArrayValue[2] = checkDistance(cm[2]);
-//      sensorArrayValue[3] = checkDistance(cm[3]);
-//      sensorArrayValue[4] = checkDistance(cm[4]);
+      // Sets the sensor array values
+      // sensorArrayValue[n] = checkDistance(cm[n]);
+      setSensorArrayValues();
     
       Array<int> array = Array<int>(sensorArrayValue, size);
 //      Serial.print("MIN VALUE: ");
@@ -491,6 +451,21 @@ void setSensorArrayValues() {
   sensorArrayValue[2] = checkDistance(cm[2]);
   sensorArrayValue[3] = checkDistance(cm[3]);
   sensorArrayValue[4] = checkDistance(cm[4]);
+
+//    Serial.print("d1: ");
+//    Serial.print(checkDistance(cm[0]));
+//    Serial.print(", ");
+//    Serial.print("d2: ");
+//    Serial.print(checkDistance(cm[1]));
+//    Serial.print(", ");
+//    Serial.print("d3: ");
+//    Serial.print(checkDistance(cm[2]));
+//    Serial.print(", ");
+//    Serial.print("d4: ");
+//    Serial.print(checkDistance(cm[3]));
+//    Serial.print(", ");
+//    Serial.print("d5: ");
+//    Serial.println(checkDistance(cm[4]));
 }
 
 int checkDistance(int distance) {
