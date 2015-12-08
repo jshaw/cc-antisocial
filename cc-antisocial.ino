@@ -77,14 +77,6 @@ int currentColor[4] = {16, 90, 160, 255};
 
 // Init an Ultrasonic object
 // ===========================
-// TODO: Put these inits and declarations into an array
-//
-//Ultrasonic ultrasonicOne(3, 2);
-//Ultrasonic ultrasonicTwo(5, 4);
-//Ultrasonic ultrasonicThree(7, 6);
-//Ultrasonic ultrasonicFour(9, 8);
-//Ultrasonic ultrasonicFive(11, 10);
-
 #define SONAR_NUM     5 // Number of sensors.
 #define MAX_DISTANCE 500 // Maximum distance (in cm) to ping.
 #define PING_INTERVAL 100 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
@@ -93,8 +85,9 @@ unsigned long pingTimer[SONAR_NUM]; // Holds the times when the next ping should
 unsigned int cm[SONAR_NUM];         // Where the ping distances are stored.
 uint8_t currentSensor = 0;          // Keeps track of which sensor is active.
 
-NewPing sonar[SONAR_NUM] = {     // Sensor object array.
-  // Each sensor's trigger pin, echo pin, and max distance to ping.
+// Sensor object array.
+// Each sensor's trigger pin, echo pin, and max distance to ping.
+NewPing sonar[SONAR_NUM] = {
   NewPing(2, 3, MAX_DISTANCE),
   NewPing(4, 5, MAX_DISTANCE),
   NewPing(6, 7, MAX_DISTANCE),
@@ -268,13 +261,12 @@ void loop() {
     }
   }
 
-
-
   int j;
   int minIndex = array.getMinIndex();
   int minNum = array.getMin();
   int disAverage = array.getAverage();
-  
+
+  // BE CURIOUS
   if(disAverage > 420){
     // switch modes
     // loop through and dop fun things like no one is watching
@@ -291,7 +283,7 @@ void loop() {
     strip.setPixelColor(pos2 + 2, strip.Color(defaultColor[1], 0, 0)); // Dark red
     strip.setPixelColor(pos2 + 3, strip.Color(defaultColor[0], 0, 0)); // Dark red
     
-//    strip.show();
+    strip.show();
     
     // Rather than being sneaky and erasing just the tail pixel,
     // it's easier to erase it all and draw a new one next time.
