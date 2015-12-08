@@ -96,6 +96,11 @@ boolean ledState = LOW; //to toggle our LED
 const long serialInterval = 50;
 unsigned long previousSerialMillis = 0;
 
+int motorStateButton = LOW;
+int motorPrevious = LOW;
+long time = 0;
+long debounce = 200;
+
 void setup() {
   //initialize serial communications at a 9600 baud rate
   Serial.begin(9600);
@@ -133,12 +138,12 @@ void setup() {
   stepper1.setMaxSpeed(200.0);
   stepper1.setAcceleration(100.0);
 ////  stepper1.moveTo(24);
-  stepper1.moveTo(-50);
+//  stepper1.moveTo(-50);
     
   stepper2.setMaxSpeed(200.0);
   stepper2.setAcceleration(100.0);
 //  stepper2.moveTo(24);
-  stepper2.moveTo(-50);
+//  stepper2.moveTo(-50);
 }
 
 void loop() {
@@ -152,6 +157,7 @@ void loop() {
         previousSerialMillis = currentMillis; 
         ledState = !ledState; //flip the ledState
         digitalWrite(ledPin, ledState);
+        motorStateButton = !motorStateButton;
       }
     } else if (val == 'u'){
 //      if (stepper1.distanceToGo() + 12 < 0 && stepper2.distanceToGo() + 12 < 0){
@@ -190,6 +196,13 @@ void loop() {
 
   stepper1.run();
   stepper2.run();
+
+  if (motorStateButton == LOW){
+    rainbow(20);
+    return;
+  }
+
+  
   
   // SENSORS
   // Loop through all the sensors.
@@ -344,7 +357,7 @@ void loop() {
       // 12 / 2 = = 6
       if(minIndex == 0){
         //  lowBase = 3;
-        lowBase = 6;
+        lowBase = 3;
       } else if (minIndex == 1){
         lowBase = 18;
       } else if(minIndex == 2) {
@@ -352,9 +365,9 @@ void loop() {
       } else if(minIndex == 3) {
         lowBase = 42;
       } else if(minIndex == 4) {
-        lowBase = 54;
+        lowBase = 55;
       } else {
-        lowBase = 54;
+        lowBase = 55;
       }
     }
   
