@@ -24,24 +24,23 @@ Adafruit_StepperMotor *myStepper2 = AFMStop.getStepper(200, 2);
 // you can change these to DOUBLE or INTERLEAVE or MICROSTEP!
 // wrappers for the first motor!
 void forwardstep1() {  
-  myStepper1->onestep(FORWARD, DOUBLE);
+  myStepper1->onestep(FORWARD, SINGLE);
 }
 void backwardstep1() {  
-  myStepper1->onestep(BACKWARD, DOUBLE);
+  myStepper1->onestep(BACKWARD, SINGLE);
 }
 
 // wrappers for the second motor!
 void forwardstep2() {  
-  myStepper2->onestep(FORWARD, DOUBLE);
+  myStepper2->onestep(FORWARD, SINGLE);
 }
 void backwardstep2() {  
-  myStepper2->onestep(BACKWARD, DOUBLE);
+  myStepper2->onestep(BACKWARD, SINGLE);
 }
 
 // Now we'll wrap the 2 steppers in an AccelStepper object
 AccelStepper stepper1(forwardstep1, backwardstep1);
 AccelStepper stepper2(forwardstep2, backwardstep2);
-
 
 
 // NEOPIXEL init
@@ -162,16 +161,15 @@ void setup() {
   // CM
   // 5 steps = 1cm
   
-
   stepper1.setMaxSpeed(200.0);
   stepper1.setAcceleration(100.0);
 ////  stepper1.moveTo(24);
-  stepper1.moveTo(50);
+  stepper1.moveTo(-50);
     
   stepper2.setMaxSpeed(200.0);
   stepper2.setAcceleration(100.0);
 //  stepper2.moveTo(24);
-  stepper2.moveTo(50);
+  stepper2.moveTo(-50);
 }
 
 
@@ -186,17 +184,23 @@ void oneSensorCycle() { // Sensor ping cycle complete, do something with the res
   for (uint8_t i = 0; i < SONAR_NUM; i++) {
     sensorArrayValue[i] = cm[i];
     
-    Serial.print(i);
-    Serial.print("=");
-    Serial.print(cm[i]);
-    Serial.print("cm ");
+//    Serial.print(i);
+//    Serial.print("=");
+//    Serial.print(cm[i]);
+//    Serial.print("cm ");
   }
-  Serial.println();
+//  Serial.println();
 }
 
 
 void loop() {
   unsigned long currentMillis = millis();
+
+//  Serial.print("stepper1.currentPosition()");
+//  Serial.println(stepper1.currentPosition());
+//
+//  Serial.print("stepper1.distanceToGo()");
+//  Serial.println(stepper1.distanceToGo());
 
   if (Serial.available()) { 
     val = Serial.read(); // read it and store it in val
@@ -207,6 +211,24 @@ void loop() {
         ledState = !ledState; //flip the ledState
         digitalWrite(ledPin, ledState);
       }
+    } else if (val == 'u'){
+//      if (stepper1.distanceToGo() + 12 < 0 && stepper2.distanceToGo() + 12 < 0){
+        stepper1.moveTo(stepper1.currentPosition() + 12);
+        stepper2.moveTo(stepper2.currentPosition() + 12);
+//      }
+    } else if (val == 'd'){
+//      if (stepper1.distanceToGo() - 12 < 0 && stepper2.distanceToGo() - 12 < 0){
+        stepper1.moveTo(stepper1.currentPosition() - 12);
+        stepper2.moveTo(stepper2.currentPosition() - 12);
+//      }
+    } else if (val == 'l'){
+//      if (stepper1.distanceToGo() + 12 < 0){
+        stepper1.moveTo(stepper1.currentPosition() + 12);
+//      }
+    } else if (val == 'r'){
+//      if (stepper2.distanceToGo() + 12 < 0){
+        stepper2.moveTo(stepper2.currentPosition() + 12);
+//      }
     }
 //    delay(10); // Wait 10 milliseconds for next reading
   } else {
@@ -423,20 +445,20 @@ void loop() {
     if(currentMillis - previousMillis >= interval) {
       previousMillis = currentMillis;  
       
-      Serial.print("d1: ");
-      Serial.print(checkDistance(cm[0]));
-      Serial.print(", ");
-      Serial.print("d2: ");
-      Serial.print(checkDistance(cm[1]));
-      Serial.print(", ");
-      Serial.print("d3: ");
-      Serial.print(checkDistance(cm[2]));
-      Serial.print(", ");
-      Serial.print("d4: ");
-      Serial.print(checkDistance(cm[3]));
-      Serial.print(", ");
-      Serial.print("d5: ");
-      Serial.println(checkDistance(cm[4]));
+//      Serial.print("d1: ");
+//      Serial.print(checkDistance(cm[0]));
+//      Serial.print(", ");
+//      Serial.print("d2: ");
+//      Serial.print(checkDistance(cm[1]));
+//      Serial.print(", ");
+//      Serial.print("d3: ");
+//      Serial.print(checkDistance(cm[2]));
+//      Serial.print(", ");
+//      Serial.print("d4: ");
+//      Serial.print(checkDistance(cm[3]));
+//      Serial.print(", ");
+//      Serial.print("d5: ");
+//      Serial.println(checkDistance(cm[4]));
       
       sensorArrayValue[0] = checkDistance(cm[0]);
       sensorArrayValue[1] = checkDistance(cm[1]);
@@ -445,12 +467,12 @@ void loop() {
       sensorArrayValue[4] = checkDistance(cm[4]);
     
       Array<int> array = Array<int>(sensorArrayValue, size);
-      Serial.print("MIN VALUE: ");
-      Serial.println(array.getMin());
-      Serial.print("MIN INDEX: ");
-      Serial.println(array.getMinIndex());
-      Serial.print("AVERAGE: ");
-      Serial.println(array.getAverage());
+//      Serial.print("MIN VALUE: ");
+//      Serial.println(array.getMin());
+//      Serial.print("MIN INDEX: ");
+//      Serial.println(array.getMinIndex());
+//      Serial.print("AVERAGE: ");
+//      Serial.println(array.getAverage());
   
   // PIXEL FOLLOW SONAR
       currentAverage = array.getAverage();
