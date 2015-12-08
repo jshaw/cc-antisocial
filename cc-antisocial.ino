@@ -184,23 +184,17 @@ void oneSensorCycle() { // Sensor ping cycle complete, do something with the res
   for (uint8_t i = 0; i < SONAR_NUM; i++) {
     sensorArrayValue[i] = cm[i];
     
-//    Serial.print(i);
-//    Serial.print("=");
-//    Serial.print(cm[i]);
-//    Serial.print("cm ");
+    Serial.print(i);
+    Serial.print("=");
+    Serial.print(cm[i]);
+    Serial.print("cm ");
   }
-//  Serial.println();
+  Serial.println();
 }
 
 
 void loop() {
   unsigned long currentMillis = millis();
-
-//  Serial.print("stepper1.currentPosition()");
-//  Serial.println(stepper1.currentPosition());
-//
-//  Serial.print("stepper1.distanceToGo()");
-//  Serial.println(stepper1.distanceToGo());
 
   if (Serial.available()) { 
     val = Serial.read(); // read it and store it in val
@@ -319,12 +313,14 @@ void loop() {
 //  #TODO: put this into a function as well as the thing below
 // when the distance gets too large, should either fade out or reset by 
 // going to position one and than do default mode stuff    
-    sensorArrayValue[0] = checkDistance(cm[0]);
-    sensorArrayValue[1] = checkDistance(cm[1]);
-    sensorArrayValue[2] = checkDistance(cm[2]);
-    sensorArrayValue[3] = checkDistance(cm[3]);
-    sensorArrayValue[4] = checkDistance(cm[4]);
-//    
+//    sensorArrayValue[0] = checkDistance(cm[0]);
+//    sensorArrayValue[1] = checkDistance(cm[1]);
+//    sensorArrayValue[2] = checkDistance(cm[2]);
+//    sensorArrayValue[3] = checkDistance(cm[3]);
+//    sensorArrayValue[4] = checkDistance(cm[4]);
+
+    setSensorArrayValues();
+  
     return;
   } else {
     
@@ -459,12 +455,14 @@ void loop() {
 //      Serial.print(", ");
 //      Serial.print("d5: ");
 //      Serial.println(checkDistance(cm[4]));
+
+        setSensorArrayValues();
       
-      sensorArrayValue[0] = checkDistance(cm[0]);
-      sensorArrayValue[1] = checkDistance(cm[1]);
-      sensorArrayValue[2] = checkDistance(cm[2]);
-      sensorArrayValue[3] = checkDistance(cm[3]);
-      sensorArrayValue[4] = checkDistance(cm[4]);
+//      sensorArrayValue[0] = checkDistance(cm[0]);
+//      sensorArrayValue[1] = checkDistance(cm[1]);
+//      sensorArrayValue[2] = checkDistance(cm[2]);
+//      sensorArrayValue[3] = checkDistance(cm[3]);
+//      sensorArrayValue[4] = checkDistance(cm[4]);
     
       Array<int> array = Array<int>(sensorArrayValue, size);
 //      Serial.print("MIN VALUE: ");
@@ -476,27 +474,23 @@ void loop() {
   
   // PIXEL FOLLOW SONAR
       currentAverage = array.getAverage();
-  
-  //    if(abs(currentAverage - previousAverage) >= averageDifference) {
-  //      previousAverage = currentAverage;
-  //      Serial.println("PREVIOUS");
-  //      Serial.println(abs(currentAverage - previousAverage));
-  //    } else {
-  //      Serial.println("========PREVIOUS=======");
-  //      Serial.println(abs(currentAverage - previousAverage));
-  //      return;
-  //    }
   //
-  //    mapSonarPosition(array.getMinIndex(), 50);
-  
+  //    Testing LED Patterns
+  //    =======================
   //    fade(10);
-      
-  //    Serial.print(", ");
-  //    Serial.print("d5: ");
-  //    Serial.println(distanceFive);
+  //    larson();
+  //    rainbow(20);
       
       }
   }
+}
+
+void setSensorArrayValues() {
+  sensorArrayValue[0] = checkDistance(cm[0]);
+  sensorArrayValue[1] = checkDistance(cm[1]);
+  sensorArrayValue[2] = checkDistance(cm[2]);
+  sensorArrayValue[3] = checkDistance(cm[3]);
+  sensorArrayValue[4] = checkDistance(cm[4]);
 }
 
 int checkDistance(int distance) {
@@ -609,33 +603,6 @@ void fadeStep(uint8_t wait) {
   }
 }
 
-void mapSonarPosition(int quator, uint8_t wait) {
-//  Serial.print("============");
-//  Serial.print(quator);
-//  Serial.println("------------");
-//  
-//  for(uint16_t i=0; i<strip.numPixels(); i++) {
-//    if(i >= (quator * 7) && i <= (quator * 7 + 7)){
-//      strip.setPixelColor(i, strip.Color(127, 127, 127));
-//      strip.show();
-////      delay(wait);
-//    } else {
-//      strip.setPixelColor(i, strip.Color(0, 0, 0));
-//      strip.show();
-//    }
-//
-//  }
-    
-//    strip.setPixelColor(, strip.Color(127, 127, 127));
-//    strip.show();
-//    delay(wait);
-//  for(uint16_t i=0; i<strip.numPixels(); i++) {
-//    strip.setPixelColor(i, c);
-//    strip.show();
-//    delay(wait);
-//  }
-}
-
 void rainbow(uint8_t wait) {
   uint16_t i, j;
 
@@ -732,6 +699,7 @@ uint32_t Wheel(byte WheelPos) {
 
 
 // SUDO CODE
+// ========================
 // Some gravity maths :
 // https://codebender.cc/sketch:56734#BouncingBalls2014.ino
 // https://github.com/fibonacci162/LEDs
@@ -775,3 +743,33 @@ uint32_t Wheel(byte WheelPos) {
 //  strip.setPixelColor(pos + 2, 0x800000); // Dark red
 //  strip.setPixelColor(pos + 3, 0x100000); // Dark red
 
+
+// Programatically lighting up static sections of the LED strip
+// Doesn't animate though
+// ========================
+//void mapSonarPosition(int quator, uint8_t wait) {
+//  Serial.print("============");
+//  Serial.print(quator);
+//  Serial.println("------------");
+//  
+//  for(uint16_t i=0; i<strip.numPixels(); i++) {
+//    if(i >= (quator * 7) && i <= (quator * 7 + 7)){
+//      strip.setPixelColor(i, strip.Color(127, 127, 127));
+//      strip.show();
+////      delay(wait);
+//    } else {
+//      strip.setPixelColor(i, strip.Color(0, 0, 0));
+//      strip.show();
+//    }
+//
+//  }
+    
+//    strip.setPixelColor(, strip.Color(127, 127, 127));
+//    strip.show();
+//    delay(wait);
+//  for(uint16_t i=0; i<strip.numPixels(); i++) {
+//    strip.setPixelColor(i, c);
+//    strip.show();
+//    delay(wait);
+//  }
+//}
