@@ -31,3 +31,6 @@ http://arduino.stackexchange.com/questions/736/digital-rgb-led-animation
 
 https://github.com/fibonacci162/LEDs
 http://fastled.io/
+
+Control Steppers
+https://learn.adafruit.com/bluetooth-motorized-camera-slider?view=all
