@@ -33,6 +33,14 @@ AccelStepper stepper2(forwardstep2, backwardstep2);
 
 #define PIN 11
 
+int furthestDist = 420;
+int minimumDistance = 0;
+int minimumFirstFence = 20;
+int lightTop = 1;
+int lightBottom = 100;
+int controlStep = 12;
+
+
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
 // Parameter 3 = pixel type flags, add together as needed:
@@ -107,11 +115,18 @@ boolean ledState = LOW; //to toggle our LED
 const long serialInterval = 50;
 unsigned long previousSerialMillis = 0;
 
+// To Control the Motor for configuration
 int motorStateButton = LOW;
 int motorPrevious = LOW;
 long time = 0;
 long debounce = 200;
 int clearBar = 0;
+
+// To turn off the motors incase it gets to busy
+int motorState = LOW;
+int motorAtBottom = 0;
+const long serialMotorInterval = 50;
+unsigned long previousMotorMillis = 0;
 
 void setup() {
 
@@ -177,27 +192,73 @@ void loop() {
         motorStateButton = !motorStateButton;
         currentValue = 0;
         conf = 0;
+        if (motorState == HIGH){
+          motorState = LOW;
+          motorAtBottom = 0;
+          motorMovingUp = 1;
+          motorMovingDown = 0;
+          stepper1.moveTo(0);
+          stepper2.moveTo(0);
+        }
       }
     } else if (val == 'u'){
-        stepper1.moveTo(stepper1.currentPosition() + 12);
-        stepper2.moveTo(stepper2.currentPosition() + 12);
+        stepper1.moveTo(stepper1.currentPosition() + controlStep);
+        stepper2.moveTo(stepper2.currentPosition() + controlStep);
 //        currentValue -= 12;
     } else if (val == 'd'){
-        stepper1.moveTo(stepper1.currentPosition() - 12);
-        stepper2.moveTo(stepper2.currentPosition() - 12);
+        stepper1.moveTo(stepper1.currentPosition() - controlStep);
+        stepper2.moveTo(stepper2.currentPosition() - controlStep);
 //        currentValue += 12;
     } else if (val == 'l'){
-        stepper1.moveTo(stepper1.currentPosition() + 12);
+        stepper1.moveTo(stepper1.currentPosition() + controlStep);
     } else if (val == 'r'){
-        stepper2.moveTo(stepper2.currentPosition() + 12);
+        stepper2.moveTo(stepper2.currentPosition() + controlStep);
     } else if (val == 'c'){
       currentValue = 0;
       conf = 1;
+      if (motorState == HIGH){
+        motorState = LOW;
+        motorAtBottom = 0;
+        motorMovingUp = 1;
+        motorMovingDown = 0;
+        stepper1.moveTo(-lightBottom);
+        stepper2.moveTo(-lightBottom0);
+      }
+    } else if (val == 'm'){
+      // TOGGLE THE MOTORS
+      if(currentMillis - previousMotorMillis >= serialMotorInterval) {
+        previousMotorMillis = currentMillis; 
+        //flip the motorState
+        motorState = !motorState;
+        motorAtBottom = 0;
+      }
     }
 //    delay(10); // Wait 10 milliseconds for next reading
   } else {
 //    Serial.println("Hello, world!"); //send back a hello world
 //    delay(50);
+  }
+
+  if (motorState == HIGH){
+      if (motorMovingDown == 0 && motorAtBottom == 0){
+        if(stepper1.currentPosition() <= lightTop && stepper1.currentPosition() >= -lightBottom){
+          motorMovingDown = 1;
+          stepper1.moveTo(stepper1.currentPosition() - lightBottom);
+          stepper2.moveTo(stepper2.currentPosition() - lightBottom);
+        }
+      }
+
+      if (motorMovingDown == 1){
+        if (stepper1.distanceToGo() == 0) {
+          // slow acceleeration?
+//          motorMovingUp = 0;
+          motorAtBottom = 1;
+          motorMovingDown = 0;
+        }
+      }
+
+      stepper1.run();
+      stepper2.run();
   }
 
   if (conf == 1){
@@ -223,7 +284,6 @@ void loop() {
     return;
   } else {
     
-    // #TODO: does this cause flashing??
     // Only clear bar the first time after showing the rainbow
     Serial.println(clearBar);
     if (clearBar == 1){
@@ -234,7 +294,6 @@ void loop() {
       strip.show();
       clearBar = 0;
     }
-    
   }
   
   // SENSORS
@@ -271,7 +330,7 @@ void loop() {
 
   // BE CURIOUS
   // =================
-  if(disAverage > 420){
+  if(disAverage > furthestDist){
     // switch modes
     // loop through and dop fun things like no one is watching
     // low yourself from the ceiling
@@ -305,8 +364,7 @@ void loop() {
     return;
   } else {
 
-  // #TODO
-//    this is a calling to look come at me if no one has in 10 seconds
+    //this is a calling to look come at me if no one has in 10 seconds
     if(currentMillis - interactionPreviousMillis >= interactionInterval) {
         interactionPreviousMillis = currentMillis; 
 
@@ -326,27 +384,28 @@ void loop() {
           strip.setPixelColor(i, strip.Color(0, 0, 0));
         }
     }
-  
     
     //  Waiting for the sonars to start to work
     if (minNum == 0){
       //  Serial.println("Waiting for the sonars to start detecting");
-    } else if (minNum > 0 && minNum < 20){
-      
-      // roll up the motors
-      if (motorMovingUp == 0){
-        if (stepper1.currentPosition() <= 1 && stepper1.currentPosition() >= -100) {
-          motorMovingUp = 1;
-          Serial.println("WTF1");
-  //        if(stepper1.currentPosition() < 51){
-          stepper1.moveTo(0);
-          stepper2.moveTo(0);
-        }
-  
-        if (motorMovingUp == 1){
-          if (stepper1.distanceToGo() == 0) {
-            // slow acceleeration?
-            motorMovingDown = 0;
+      // minimumDistance = 0
+      // minimumFirstFence = 20
+    } else if (minNum > minimumDistance && minNum < minimumFirstFence){
+
+      if (motorState == LOW){
+        // roll up the motors
+        if (motorMovingUp == 0){
+          if (stepper1.currentPosition() <= lightTop && stepper1.currentPosition() >= -lightBottom) {
+            motorMovingUp = 1;
+            stepper1.moveTo(0);
+            stepper2.moveTo(0);
+          }
+    
+          if (motorMovingUp == 1){
+            if (stepper1.distanceToGo() == 0) {
+              // slow acceleeration?
+              motorMovingDown = 0;
+            }
           }
         }
       }
@@ -390,22 +449,23 @@ void loop() {
     } else if (minNum > 19) {
 
       Serial.println(minNum);
-
-      if (motorMovingDown == 0){
-        if(stepper1.currentPosition() <= 1 && stepper1.currentPosition() >= -100){
-          motorMovingDown = 1;
-          Serial.println("WTF2");
-          stepper1.moveTo(stepper1.currentPosition() - 100);
-          stepper2.moveTo(stepper2.currentPosition() - 100);
-        } else {
-          
+      
+      if (motorState == LOW){
+        if (motorMovingDown == 0){
+          if(stepper1.currentPosition() <= lightTop && stepper1.currentPosition() >= -lightBottom){
+            motorMovingDown = 1;
+            stepper1.moveTo(stepper1.currentPosition() - lightBottom);
+            stepper2.moveTo(stepper2.currentPosition() - lightBottom);
+          } else {
+            
+          }
         }
-      }
-
-      if (motorMovingDown == 1){
-        if (stepper1.distanceToGo() == 0) {
-          // slow acceleeration?
-          motorMovingUp = 0;
+  
+        if (motorMovingDown == 1){
+          if (stepper1.distanceToGo() == 0) {
+            // slow acceleeration?
+            motorMovingUp = 0;
+          }
         }
       }
       
@@ -434,7 +494,6 @@ void loop() {
     setLEDPosition(pos);
    
     strip.show();
-    //  delay(30);
    
     // Rather than being sneaky and erasing just the tail pixel,
     // it's easier to erase it all and draw a new one next time.
