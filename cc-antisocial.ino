@@ -59,7 +59,7 @@ int currentColor[4] = {16, 90, 160, 255};
 // ===========================
 #define SONAR_NUM     5 // Number of sensors.
 #define MAX_DISTANCE 500 // Maximum distance (in cm) to ping.
-#define PING_INTERVAL 500 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
+#define PING_INTERVAL 100 // Milliseconds between sensor pings (29ms is about the min to avoid cross-sensor echo).
 
 unsigned long pingTimer[SONAR_NUM]; // Holds the times when the next ping should happen for each sensor.
 unsigned int cm[SONAR_NUM];         // Where the ping distances are stored.
