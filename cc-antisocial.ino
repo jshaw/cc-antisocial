@@ -111,6 +111,7 @@ int motorStateButton = LOW;
 int motorPrevious = LOW;
 long time = 0;
 long debounce = 200;
+int clearBar = 0;
 
 void setup() {
 
@@ -167,8 +168,8 @@ void setup() {
 void loop() {
   unsigned long currentMillis = millis();
 
-  Serial.print("L: Current POS");
-  Serial.println(stepper1.currentPosition());
+//  Serial.print("L: Current POS");
+//  Serial.println(stepper1.currentPosition());
 
   if (Serial.available()) { 
     val = Serial.read(); // read it and store it in val
@@ -204,16 +205,6 @@ void loop() {
 //    delay(50);
   }
 
-  // STEPPER 
-  // Change direction at the limits
-//  if (stepper1.distanceToGo() == 0){
-//    stepper1.moveTo(-stepper1.currentPosition());
-//  }
-//
-//  if (stepper2.distanceToGo() == 0) {
-//    stepper2.moveTo(-stepper2.currentPosition());
-//  }
-
   if (conf == 1){
     for(int i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, strip.Color(127, 127, 127));
@@ -229,17 +220,26 @@ void loop() {
   if (motorStateButton == LOW){
     //  rainbow(20);
     rainbowCycle(20);
+    clearBar = 1;
     
     stepper1.run();
     stepper2.run();
     
     return;
   } else {
+    
     // #TODO: does this cause flashing??
-    for(int i=0; i<strip.numPixels(); i++) {
-      strip.setPixelColor(i, strip.Color(0, 0, 0));
+    // Only clear bar the first time after showing the rainbow
+    Serial.println(clearBar);
+    if (clearBar == 1){
+      Serial.println("HOW MUCH GOES IN HERE?");
+      for(int i=0; i<strip.numPixels(); i++) {
+        strip.setPixelColor(i, strip.Color(0, 0, 0));
+      }
+      strip.show();
+      clearBar = 0;
     }
-    strip.show();
+    
   }
   
   // SENSORS
@@ -314,12 +314,22 @@ void loop() {
 //    this is a calling to look come at me if no one has in 10 seconds
     if(currentMillis - interactionPreviousMillis >= interactionInterval) {
         interactionPreviousMillis = currentMillis; 
+
+        int r = random(0, 255);
+        int g = random(0, 255);
+        int b = random(0, 255);
         
         for(int i=0; i<strip.numPixels(); i++) {
-          strip.setPixelColor(i, strip.Color(127, 127, 127));
+//          strip.setPixelColor(i, strip.Color(127, 127, 127));
+          strip.setPixelColor(i, strip.Color(r, g, b));
         }
         strip.show();
+        // peeps won't be liking this 
         delay(500);
+
+        for(int i=0; i<strip.numPixels(); i++) {
+          strip.setPixelColor(i, strip.Color(0, 0, 0));
+        }
     }
   
     
@@ -911,3 +921,13 @@ uint32_t Wheel(byte WheelPos) {
 //    delay(wait);
 //  }
 //}
+
+// STEPPER Demo code
+  // Change direction at the limits
+//  if (stepper1.distanceToGo() == 0){
+//    stepper1.moveTo(-stepper1.currentPosition());
+//  }
+//
+//  if (stepper2.distanceToGo() == 0) {
+//    stepper2.moveTo(-stepper2.currentPosition());
+//  }
