@@ -540,13 +540,56 @@ void oneSensorCycle() { // Sensor ping cycle complete, do something with the res
 // Draw 5 pixels centered on pos.  setPixelColor() will clip any
 // pixels off the ends of the strip, we don't need to watch for that.
 void setLEDPosition(int ledPosition) {
-  strip.setPixelColor(ledPosition - 3, strip.Color(currentColor[0], 0, 0)); // Dark red
-  strip.setPixelColor(ledPosition - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-  strip.setPixelColor(ledPosition - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-  strip.setPixelColor(ledPosition    , strip.Color(currentColor[3], 0 , 0)); // Center pixel is brightest
-  strip.setPixelColor(ledPosition + 1, strip.Color(currentColor[2], 0, 0)); // Medium red
-  strip.setPixelColor(ledPosition + 2, strip.Color(currentColor[1], 0, 0)); // Dark red
-  strip.setPixelColor(ledPosition + 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+
+// Red
+// ==========
+//  strip.setPixelColor(ledPosition - 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+//  strip.setPixelColor(ledPosition - 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+//  strip.setPixelColor(ledPosition - 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+//  strip.setPixelColor(ledPosition    , strip.Color(currentColor[3], 0 , 0)); // Center pixel is brightest
+//  strip.setPixelColor(ledPosition + 1, strip.Color(currentColor[2], 0, 0)); // Medium red
+//  strip.setPixelColor(ledPosition + 2, strip.Color(currentColor[1], 0, 0)); // Dark red
+//  strip.setPixelColor(ledPosition + 3, strip.Color(currentColor[0], 0, 0)); // Dark red
+
+// Green
+// ==========
+//  strip.setPixelColor(ledPosition - 3, strip.Color(0, currentColor[0], 0)); // Dark red
+//  strip.setPixelColor(ledPosition - 2, strip.Color(0, currentColor[1], 0)); // Dark red
+//  strip.setPixelColor(ledPosition - 1, strip.Color(0, currentColor[2], 0)); // Medium red
+//  strip.setPixelColor(ledPosition    , strip.Color(0, currentColor[3], 0)); // Center pixel is brightest
+//  strip.setPixelColor(ledPosition + 1, strip.Color(0, currentColor[2], 0)); // Medium red
+//  strip.setPixelColor(ledPosition + 2, strip.Color(0, currentColor[1], 0)); // Dark red
+//  strip.setPixelColor(ledPosition + 3, strip.Color(0, currentColor[0], 0)); // Dark red
+
+// yellow
+// ==========
+//  strip.setPixelColor(ledPosition - 3, strip.Color(currentColor[0], currentColor[0], 0)); // Dark red
+//  strip.setPixelColor(ledPosition - 2, strip.Color(currentColor[1], currentColor[1], 0)); // Dark red
+//  strip.setPixelColor(ledPosition - 1, strip.Color(currentColor[2], currentColor[2], 0)); // Medium red
+//  strip.setPixelColor(ledPosition    , strip.Color(currentColor[3], currentColor[3], 0)); // Center pixel is brightest
+//  strip.setPixelColor(ledPosition + 1, strip.Color(currentColor[2], currentColor[2], 0)); // Medium red
+//  strip.setPixelColor(ledPosition + 2, strip.Color(currentColor[1], currentColor[1], 0)); // Dark red
+//  strip.setPixelColor(ledPosition + 3, strip.Color(currentColor[0], currentColor[0], 0)); // Dark red
+
+//  BLUE
+// ==========
+//  strip.setPixelColor(ledPosition - 3, strip.Color(0, currentColor[0], currentColor[0])); // Dark red
+//  strip.setPixelColor(ledPosition - 2, strip.Color(0, currentColor[1], currentColor[1])); // Dark red
+//  strip.setPixelColor(ledPosition - 1, strip.Color(0, currentColor[2], currentColor[2])); // Medium red
+//  strip.setPixelColor(ledPosition    , strip.Color(0, currentColor[3], currentColor[3])); // Center pixel is brightest
+//  strip.setPixelColor(ledPosition + 1, strip.Color(0, currentColor[2], currentColor[2])); // Medium red
+//  strip.setPixelColor(ledPosition + 2, strip.Color(0, currentColor[1], currentColor[1])); // Dark red
+//  strip.setPixelColor(ledPosition + 3, strip.Color(0, currentColor[0], currentColor[0])); // Dark red
+
+  //  White
+  // ==========
+  strip.setPixelColor(ledPosition - 3, strip.Color(currentColor[0], currentColor[0], currentColor[0])); // Dark red
+  strip.setPixelColor(ledPosition - 2, strip.Color(currentColor[1], currentColor[1], currentColor[1])); // Dark red
+  strip.setPixelColor(ledPosition - 1, strip.Color(currentColor[2], currentColor[2], currentColor[2])); // Medium red
+  strip.setPixelColor(ledPosition    , strip.Color(currentColor[3], currentColor[3], currentColor[3])); // Center pixel is brightest
+  strip.setPixelColor(ledPosition + 1, strip.Color(currentColor[2], currentColor[2], currentColor[2])); // Medium red
+  strip.setPixelColor(ledPosition + 2, strip.Color(currentColor[1], currentColor[1], currentColor[1])); // Dark red
+  strip.setPixelColor(ledPosition + 3, strip.Color(currentColor[0], currentColor[0], currentColor[0])); // Dark red
 
   //  Original hex values 
   // ========================
