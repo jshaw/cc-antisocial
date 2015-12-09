@@ -97,6 +97,10 @@ int motorMovingDown = 0;
 const long interval = 500;
 unsigned long previousMillis = 0;
 
+const long interactionInterval = 10000;
+const long interactionPreviousInterval = 0;
+unsigned long interactionPreviousMillis = 0;
+
 char val; // Data received from the serial port
 int ledPin = 12; // Set the pin to digital I/O 13
 boolean ledState = LOW; //to toggle our LED
@@ -222,7 +226,6 @@ void loop() {
     return;
   }
 
-
   if (motorStateButton == LOW){
     //  rainbow(20);
     rainbowCycle(20);
@@ -232,6 +235,7 @@ void loop() {
     
     return;
   } else {
+    // #TODO: does this cause flashing??
     for(int i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, strip.Color(0, 0, 0));
     }
@@ -305,6 +309,19 @@ void loop() {
   
     return;
   } else {
+
+  // #TODO
+//    this is a calling to look come at me if no one has in 10 seconds
+    if(currentMillis - interactionPreviousMillis >= interactionInterval) {
+        interactionPreviousMillis = currentMillis; 
+        
+        for(int i=0; i<strip.numPixels(); i++) {
+          strip.setPixelColor(i, strip.Color(127, 127, 127));
+        }
+        strip.show();
+        delay(500);
+    }
+  
     
     //  Waiting for the sonars to start to work
     if (minNum == 0){
