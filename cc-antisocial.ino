@@ -118,7 +118,6 @@ void setup() {
   Serial.print("S: Current POS");
   Serial.println(stepper1.currentPosition());
   
-  
   //initialize serial communications at a 9600 baud rate
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT); // Set pin as OUTPUT
@@ -155,14 +154,10 @@ void setup() {
   stepper1.setMaxSpeed(200.0);
   stepper1.setAcceleration(100.0);
   stepper1.moveTo(1);
-//  stepper1.moveTo(24);
-//  stepper1.moveTo(-50);
     
   stepper2.setMaxSpeed(200.0);
   stepper2.setAcceleration(100.0);
   stepper2.moveTo(1);
-//  stepper2.moveTo(24);
-//  stepper2.moveTo(-50);
 }
 
 void loop() {
@@ -320,7 +315,7 @@ void loop() {
         int b = random(0, 255);
         
         for(int i=0; i<strip.numPixels(); i++) {
-//          strip.setPixelColor(i, strip.Color(127, 127, 127));
+          //  strip.setPixelColor(i, strip.Color(127, 127, 127));
           strip.setPixelColor(i, strip.Color(r, g, b));
         }
         strip.show();
@@ -413,23 +408,6 @@ void loop() {
           motorMovingUp = 0;
         }
       }
-      
-      // Roll the numbers down
-////      stepper1.moveTo(-50);
-//      stepper1.moveTo(stepper1.currentPosition() + 50);
-//      
-//      if (stepper1.distanceToGo() != 0){
-//        // FAST ACCELERATION
-//        
-//      }
-//
-////      stepper2.moveTo(-50);
-//      stepper2.moveTo(stepper2.currentPosition() + 50);
-//      
-//      if (stepper2.distanceToGo() != 0) {
-//        // FAST ACCELERATION
-//        
-//      }
       
       if (currentColor[0] < defaultColor[0]){
         currentColor[0] += 5;
@@ -665,7 +643,6 @@ int checkDistance(int distance) {
 void establishContact() {
   while (Serial.available() <= 0) {
     Serial.println("A");   // send a capital A
-//    delay(300);
   }
 }
 
