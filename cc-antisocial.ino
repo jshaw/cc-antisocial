@@ -85,6 +85,13 @@ const long averageDifferenceHigh = 20;
 unsigned long previousAverage = 0;
 unsigned long currentAverage = 0;
 
+// Length of slider
+#define STEPPER_STEPS 1100
+int currentValue = 0;
+int conf = 0;
+int motorMovingUp = 0;
+int motorMovingDown = 0;
+
 // Timer init
 // ===========================
 const long interval = 500;
@@ -102,6 +109,11 @@ long time = 0;
 long debounce = 200;
 
 void setup() {
+
+  Serial.print("S: Current POS");
+  Serial.println(stepper1.currentPosition());
+  
+  
   //initialize serial communications at a 9600 baud rate
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT); // Set pin as OUTPUT
@@ -137,17 +149,22 @@ void setup() {
   
   stepper1.setMaxSpeed(200.0);
   stepper1.setAcceleration(100.0);
-////  stepper1.moveTo(24);
+  stepper1.moveTo(1);
+//  stepper1.moveTo(24);
 //  stepper1.moveTo(-50);
     
   stepper2.setMaxSpeed(200.0);
   stepper2.setAcceleration(100.0);
+  stepper2.moveTo(1);
 //  stepper2.moveTo(24);
 //  stepper2.moveTo(-50);
 }
 
 void loop() {
   unsigned long currentMillis = millis();
+
+  Serial.print("L: Current POS");
+  Serial.println(stepper1.currentPosition());
 
   if (Serial.available()) { 
     val = Serial.read(); // read it and store it in val
@@ -158,25 +175,24 @@ void loop() {
         ledState = !ledState; //flip the ledState
         digitalWrite(ledPin, ledState);
         motorStateButton = !motorStateButton;
+        currentValue = 0;
+        conf = 0;
       }
     } else if (val == 'u'){
-//      if (stepper1.distanceToGo() + 12 < 0 && stepper2.distanceToGo() + 12 < 0){
         stepper1.moveTo(stepper1.currentPosition() + 12);
         stepper2.moveTo(stepper2.currentPosition() + 12);
-//      }
+//        currentValue -= 12;
     } else if (val == 'd'){
-//      if (stepper1.distanceToGo() - 12 < 0 && stepper2.distanceToGo() - 12 < 0){
         stepper1.moveTo(stepper1.currentPosition() - 12);
         stepper2.moveTo(stepper2.currentPosition() - 12);
-//      }
+//        currentValue += 12;
     } else if (val == 'l'){
-//      if (stepper1.distanceToGo() + 12 < 0){
         stepper1.moveTo(stepper1.currentPosition() + 12);
-//      }
     } else if (val == 'r'){
-//      if (stepper2.distanceToGo() + 12 < 0){
         stepper2.moveTo(stepper2.currentPosition() + 12);
-//      }
+    } else if (val == 'c'){
+      currentValue = 0;
+      conf = 1;
     }
 //    delay(10); // Wait 10 milliseconds for next reading
   } else {
@@ -194,11 +210,26 @@ void loop() {
 //    stepper2.moveTo(-stepper2.currentPosition());
 //  }
 
-  stepper1.run();
-  stepper2.run();
+  if (conf == 1){
+    for(int i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, strip.Color(127, 127, 127));
+    }
+    strip.show();
+  
+    stepper1.run();
+    stepper2.run();
+    
+    return;
+  }
+
 
   if (motorStateButton == LOW){
-    rainbow(20);
+    //  rainbow(20);
+    rainbowCycle(20);
+    
+    stepper1.run();
+    stepper2.run();
+    
     return;
   }
 
@@ -276,10 +307,26 @@ void loop() {
     if (minNum == 0){
       //  Serial.println("Waiting for the sonars to start detecting");
     } else if (minNum > 0 && minNum < 20){
-      // roll up the motors
       
+      // roll up the motors
+      if (motorMovingUp == 0){
+        if (stepper1.currentPosition() <= 1 && stepper1.currentPosition() >= -100) {
+          motorMovingUp = 1;
+          Serial.println("WTF1");
+  //        if(stepper1.currentPosition() < 51){
+          stepper1.moveTo(0);
+          stepper2.moveTo(0);
+        }
+  
+        if (motorMovingUp == 1){
+          if (stepper1.distanceToGo() == 0) {
+            // slow acceleeration?
+            motorMovingDown = 0;
+          }
+        }
+      }
+
       // fade the lights
-      // TODO: put this in a function
       if (currentColor[0] > 0){
         currentColor[0] -= 10;
         if(currentColor[0] < 0){
@@ -316,6 +363,44 @@ void loop() {
       }
       
     } else if (minNum > 19) {
+
+      Serial.println(minNum);
+
+      if (motorMovingDown == 0){
+        if(stepper1.currentPosition() <= 1 && stepper1.currentPosition() >= -100){
+          motorMovingDown = 1;
+          Serial.println("WTF2");
+          stepper1.moveTo(stepper1.currentPosition() - 100);
+          stepper2.moveTo(stepper2.currentPosition() - 100);
+        } else {
+          
+        }
+      }
+
+      if (motorMovingDown == 1){
+        if (stepper1.distanceToGo() == 0) {
+          // slow acceleeration?
+          motorMovingUp = 0;
+        }
+      }
+      
+      // Roll the numbers down
+////      stepper1.moveTo(-50);
+//      stepper1.moveTo(stepper1.currentPosition() + 50);
+//      
+//      if (stepper1.distanceToGo() != 0){
+//        // FAST ACCELERATION
+//        
+//      }
+//
+////      stepper2.moveTo(-50);
+//      stepper2.moveTo(stepper2.currentPosition() + 50);
+//      
+//      if (stepper2.distanceToGo() != 0) {
+//        // FAST ACCELERATION
+//        
+//      }
+      
       if (currentColor[0] < defaultColor[0]){
         currentColor[0] += 5;
       }
@@ -350,6 +435,7 @@ void loop() {
     }
   
     currentAverage = array.getAverage();
+
     if((abs(currentAverage - previousAverage) >= averageDifferenceLow) || (abs(currentAverage - previousAverage) <= averageDifferenceHigh)) {
       previousAverage = currentAverage;
 
@@ -405,6 +491,9 @@ void loop() {
       
       }
   }
+
+  stepper1.run();
+  stepper2.run();
 }
 
 // you can change these to DOUBLE or INTERLEAVE or MICROSTEP!
@@ -439,7 +528,7 @@ void oneSensorCycle() { // Sensor ping cycle complete, do something with the res
     
     Serial.print(i);
     Serial.print("=");
-    Serial.print(cm[i]);
+    Serial.print(checkDistance(cm[i]));
     Serial.print("cm ");
   }
   Serial.println();
@@ -493,7 +582,7 @@ void setSensorArrayValues() {
 int checkDistance(int distance) {
   if(distance > 400){
     return 400;
-  } else if (distance < 3) {
+  } else if (distance < 5) {
     return 400;
   } else {
     return distance;
@@ -608,7 +697,7 @@ void rainbow(uint8_t wait) {
       strip.setPixelColor(i, Wheel((i+j) & 255));
     }
     strip.show();
-    delay(wait);
+//    delay(wait);
   }
 }
 
@@ -621,7 +710,7 @@ void rainbowCycle(uint8_t wait) {
       strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
     }
     strip.show();
-    delay(wait);
+//    delay(wait);
   }
 }
 
