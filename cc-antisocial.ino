@@ -31,7 +31,8 @@ AccelStepper stepper2(forwardstep2, backwardstep2);
 // and minimize distance between Arduino and first pixel.  Avoid connecting
 // on a live circuit...if you must, connect GND first.
 
-#define PIN 11
+//#define PIN 11
+#define PIN 12
 
 int furthestDist = 420;
 int minimumDistance = 0;
@@ -80,7 +81,7 @@ NewPing sonar[SONAR_NUM] = {
   NewPing(4, 5, MAX_DISTANCE),
   NewPing(6, 7, MAX_DISTANCE),
   NewPing(8, 9, MAX_DISTANCE),
-  NewPing(10, 13, MAX_DISTANCE)
+  NewPing(10, 11, MAX_DISTANCE)
 };
 
 const byte size = 5;
@@ -110,7 +111,7 @@ const long interactionPreviousInterval = 0;
 unsigned long interactionPreviousMillis = 0;
 
 char val; // Data received from the serial port
-int ledPin = 12; // Set the pin to digital I/O 13
+int ledPin = 13; // Set the pin to digital I/O 13
 boolean ledState = LOW; //to toggle our LED
 const long serialInterval = 50;
 unsigned long previousSerialMillis = 0;
@@ -222,7 +223,7 @@ void loop() {
         motorMovingUp = 1;
         motorMovingDown = 0;
         stepper1.moveTo(-lightBottom);
-        stepper2.moveTo(-lightBottom0);
+        stepper2.moveTo(-lightBottom);
       }
     } else if (val == 'm'){
       // TOGGLE THE MOTORS
@@ -285,7 +286,7 @@ void loop() {
   } else {
     
     // Only clear bar the first time after showing the rainbow
-    Serial.println(clearBar);
+//    Serial.println(clearBar);
     if (clearBar == 1){
       Serial.println("HOW MUCH GOES IN HERE?");
       for(int i=0; i<strip.numPixels(); i++) {
@@ -596,6 +597,11 @@ void oneSensorCycle() { // Sensor ping cycle complete, do something with the res
     Serial.print(i);
     Serial.print("=");
     Serial.print(checkDistance(cm[i]));
+    Serial.print("cm ");
+    Serial.print(" || ");
+    Serial.print(i);
+    Serial.print("=");
+    Serial.print(cm[i]);
     Serial.print("cm ");
   }
   Serial.println();
