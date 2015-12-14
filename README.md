@@ -1,5 +1,7 @@
 # cc-antisocial
-repo for antisocial installation for creation &amp; computation final project
+repo for antisocial installation for creation &amp; computation final project. 
+
+The processing sketch for this project for controlling the installation via Bluetooth is located in the accompanying repo https://github.com/jshaw/cc-antisocial-processing
 
 ## Bluetooth Reference
 http://forum.arduino.cc/index.php?topic=200545.0
